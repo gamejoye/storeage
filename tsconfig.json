@@ -1,0 +1,17 @@
+{
+  "include": ["src", "global.d.ts"],
+  "compilerOptions": {
+    "target": "ES2015",
+    "module": "esnext",
+    "lib": ["dom", "esnext"],
+    "declaration": true,
+    "sourceMap": true,
+    "rootDir": "./src",
+    "strict": true,
+    "noImplicitReturns": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+  },
+}
