@@ -6,4 +6,3 @@ export function deserialize(valueString: string): any {
   }
   return value;
 }
-
