@@ -1,7 +1,5 @@
-type Drivers = 'localstorage' | 'idb';
-
 interface ConfigOptions {
-  driver?: Drivers[];
+  driver?: string[];
   name?: string;
   storeName?: string;
   version?: number;

@@ -1,13 +1,14 @@
 import { idbDriver } from './drivers/idb';
 import { localstorageDriver } from './drivers/localstorage';
+import { INTERNAL_DRIVERS } from './constants';
 
-const driversMap: [Drivers, IDriver][] = [
-  ['idb', idbDriver],
-  ['localstorage', localstorageDriver],
+const driversMap: [string, IDriver][] = [
+  [INTERNAL_DRIVERS.IDB, idbDriver],
+  [INTERNAL_DRIVERS.LOCALSTORAGE, localstorageDriver],
 ];
 
-const defaultDriversSequence: Drivers[] = ['idb', 'localstorage'];
-let configDriversSequence: Drivers[] = [];
+const defaultDriversSequence = [INTERNAL_DRIVERS.IDB, INTERNAL_DRIVERS.LOCALSTORAGE];
+let configDriversSequence: string[] = [];
 
 const getDriver = () => {
   for (const driver of configDriversSequence) {

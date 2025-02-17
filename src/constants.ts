@@ -10,3 +10,8 @@ export const IDB_MODE = {
   READ_WRITE: 'readwrite',
   VERSION_CHANGE: 'versionchange',
 } as const;
+
+export const INTERNAL_DRIVERS = {
+  LOCALSTORAGE: 'localstorage',
+  IDB: 'idb',
+} as const;
