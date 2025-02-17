@@ -1,8 +1,4 @@
 export function deserialize(valueString: string): any {
-  if (valueString === null) return null;
-  const { type, value } = JSON.parse(valueString);
-  if (type === 'Number') {
-    return +value;
-  }
-  return value;
+  // TODO 处理 ArrayBuffer, Int8Array 等类型
+  return JSON.parse(valueString);
 }
