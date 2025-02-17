@@ -6,6 +6,8 @@ interface ConfigOptions {
 }
 
 interface IDriver {
+  driverName: string;
+
   config: (options: ConfigOptions) => void;
 
   getItem: <T>(key: string) => Promise<T>;

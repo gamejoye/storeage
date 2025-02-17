@@ -4,7 +4,8 @@ import { deserialize, serialize } from '../utils';
 export class LocalStorageDriver implements IDriver {
   private options: Required<ConfigOptions> = DEFAULT_CONFIG;
   private keyPrefix: string = '';
-  config(options: ConfigOptions = DEFAULT_CONFIG): void {
+  driverName = 'LocalStorageStorage';
+  config(options: ConfigOptions = {}): void {
     this.options = { ...DEFAULT_CONFIG, ...options };
     this.keyPrefix = `${this.options.name}/${this.options.storeName}/`;
   }

@@ -4,6 +4,7 @@ export class IDBDriver implements IDriver {
   private options: Required<ConfigOptions> = DEFAULT_CONFIG;
   private keyPrefix: string = '';
   private db!: IDBDatabase;
+  driverName = 'IndexedDBStorage';
   config(options: ConfigOptions = {}): void {
     this.options = { ...DEFAULT_CONFIG, ...options };
     this.keyPrefix = `${this.options.name}/${this.options.storeName}/`;

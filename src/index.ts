@@ -9,6 +9,7 @@ class Storeage {
   ];
   private defaultDriversSequence = [INTERNAL_DRIVERS.IDB, INTERNAL_DRIVERS.LOCALSTORAGE];
   private configDriversSequence: string[] = [];
+  private driverName: string | null = null;
 
   getDriver() {
     for (const driver of this.configDriversSequence) {
@@ -29,7 +30,7 @@ class Storeage {
     return localstorageDriver;
   }
 
-  config: IDriver['config'] = (options: ConfigOptions = {}) => {
+  config: IDriver['config'] = (options: ConfigOptions) => {
     if (options.driver) {
       this.configDriversSequence = options.driver;
     }
@@ -39,7 +40,13 @@ class Storeage {
         ? this.configDriversSequence
         : this.defaultDriversSequence,
     };
-    return this.getDriver().config(options);
+    const result = this.getDriver().config(options);
+    this.getDriver()
+      .ready()
+      .then(() => {
+        this.driverName = this.getDriver().driverName;
+      });
+    return result;
   };
 
   getItem: IDriver['getItem'] = (...args) => {
@@ -59,6 +66,10 @@ class Storeage {
 
   ready: IDriver['ready'] = (...args) => {
     return this.getDriver().ready(...args);
+  };
+
+  driver = () => {
+    return this.driverName;
   };
 }
 
