@@ -6,7 +6,8 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "prepare": "husky",
-    "lint-fix": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix"
+    "lint-fix": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix",
+    "dev": "vite"
   },
   "author": "gamejoye",
   "license": "MIT",
@@ -28,6 +29,7 @@
     "lint-staged": "^15.4.3",
     "prettier": "^3.5.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0"
   }
 }
