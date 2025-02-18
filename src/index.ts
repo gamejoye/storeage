@@ -76,6 +76,10 @@ class Storeage {
     return this.getDriver().keys(...args);
   };
 
+  iterate: IDriver['iterate'] = (...args) => {
+    return this.getDriver().iterate(...args);
+  };
+
   driver = () => {
     return this.driverName;
   };

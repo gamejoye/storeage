@@ -88,6 +88,38 @@ export class LocalStorageDriver implements IDriver {
     }
   }
 
+  iterate<T, U>(callback: (key: string, value: T, index: number) => U): Promise<U | void>;
+  iterate<T, U>(
+    callback: (key: string, value: T, index: number) => U,
+    onSuccess: (result: U | void) => void
+  ): void;
+  iterate<T, U>(
+    callback: (key: string, value: T, index: number) => U | void,
+    onSuccess?: (result: U | void) => void
+  ): void | Promise<U | void> {
+    const executor = () => {
+      return new Promise<U | void>(resolve => {
+        this.keys().then(async keys => {
+          for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            const value = await this.getItem<T>(key);
+            const result = callback(key, value, i);
+            if (result !== undefined) {
+              resolve(result);
+              return;
+            }
+          }
+          resolve();
+        });
+      });
+    };
+    if (onSuccess) {
+      executor().then(onSuccess);
+      return;
+    }
+    return executor();
+  }
+
   ready(): Promise<void> {
     return Promise.resolve();
   }

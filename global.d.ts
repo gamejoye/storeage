@@ -28,5 +28,11 @@ interface IDriver {
   keys: () => Promise<string[]>;
   keys: (onSuccess: (keys: string[]) => void) => void;
 
+  iterate: <T, U>(callback: (key: string, value: T, index: number) => U) => Promise<U | void>;
+  iterate: <T, U>(
+    callback: (key: string, value: T, index: number) => U,
+    onSuccess: (result: U | void) => void
+  ) => void;
+
   ready: () => Promise<void>;
 }

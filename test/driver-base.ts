@@ -3,6 +3,31 @@ import storeage from '../src/index.ts';
 const currentDriver = document.getElementById('currentDriver')!;
 currentDriver.textContent = storeage.driver() + '';
 
+(async () => {
+  await storeage
+    .iterate((key, value, index) => {
+      console.log('=> ', index, key, value);
+      if (index === 3) {
+        return [key, value];
+      }
+    })
+    .then(result => {
+      console.log('done', result);
+      console.log('--------------------------------');
+      console.log('--------------------------------');
+    });
+
+  await storeage
+    .iterate((key, value, index) => {
+      console.log('=> ', index, key, value);
+    })
+    .then(result => {
+      console.log('done', result);
+      console.log('--------------------------------');
+      console.log('--------------------------------');
+    });
+})();
+
 storeage.ready().then(() => {
   currentDriver.textContent = storeage.driver() + '';
   storeage.length().then(length => {
