@@ -22,5 +22,11 @@ interface IDriver {
   clear: () => Promise<void>;
   clear: (onSuccess: () => void) => void;
 
+  length: () => Promise<number>;
+  length: (onSuccess: (length: number) => void) => void;
+
+  keys: () => Promise<string[]>;
+  keys: (onSuccess: (keys: string[]) => void) => void;
+
   ready: () => Promise<void>;
 }

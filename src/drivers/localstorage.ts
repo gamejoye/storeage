@@ -54,12 +54,54 @@ export class LocalStorageDriver implements IDriver {
     }
   }
 
+  length(): Promise<number>;
+  length(onSuccess: (length: number) => void): void;
+  length(onSuccess?: (length: number) => void): void | Promise<number> {
+    let count = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && this.isBelongsToStore(key)) {
+        count++;
+      }
+    }
+    if (onSuccess) {
+      onSuccess(count);
+    } else {
+      return Promise.resolve(count);
+    }
+  }
+
+  keys(): Promise<string[]>;
+  keys(onSuccess: (keys: string[]) => void): void;
+  keys(onSuccess?: (keys: string[]) => void): void | Promise<string[]> {
+    const keys: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && this.isBelongsToStore(key)) {
+        keys.push(this.decodeInternalKey(key));
+      }
+    }
+    if (onSuccess) {
+      onSuccess(keys);
+    } else {
+      return Promise.resolve(keys);
+    }
+  }
+
   ready(): Promise<void> {
     return Promise.resolve();
   }
 
-  private internalKeyGenerator(key: string): string {
-    return this.keyPrefix + key;
+  private internalKeyGenerator(originalKey: string): string {
+    return this.keyPrefix + originalKey;
+  }
+
+  private decodeInternalKey(internalKey: string): string {
+    return internalKey.slice(this.keyPrefix.length);
+  }
+
+  private isBelongsToStore(key: string): boolean {
+    return key.startsWith(this.keyPrefix);
   }
 }
 

@@ -5,6 +5,12 @@ currentDriver.textContent = storeage.driver() + '';
 
 storeage.ready().then(() => {
   currentDriver.textContent = storeage.driver() + '';
+  storeage.length().then(length => {
+    document.getElementById('length')!.textContent = length + '';
+  });
+  storeage.keys().then(keys => {
+    document.getElementById('keys')!.textContent = keys.join(', ');
+  });
 });
 
 // 用于显示结果

@@ -2,12 +2,10 @@ import { DEFAULT_CONFIG, IDB_MODE } from '../constants';
 
 export class IDBDriver implements IDriver {
   private options: Required<ConfigOptions> = DEFAULT_CONFIG;
-  private keyPrefix: string = '';
   private db!: IDBDatabase;
   driverName = 'IndexedDBStorage';
   config(options: ConfigOptions = {}): void {
     this.options = { ...DEFAULT_CONFIG, ...options };
-    this.keyPrefix = `${this.options.name}/${this.options.storeName}/`;
   }
 
   getItem<T>(key: string): Promise<T>;
@@ -19,7 +17,7 @@ export class IDBDriver implements IDriver {
           const getRequest = this.db
             .transaction(this.options.storeName, IDB_MODE.READ_ONLY)
             .objectStore(this.options.storeName)
-            .get(this.internalKeyGenerator(key));
+            .get(key);
           getRequest.onsuccess = () => {
             resolve(getRequest.result === undefined ? null : getRequest.result);
           };
@@ -42,7 +40,7 @@ export class IDBDriver implements IDriver {
           const putRequest = this.db
             .transaction(this.options.storeName, IDB_MODE.READ_WRITE)
             .objectStore(this.options.storeName)
-            .put(value, this.internalKeyGenerator(key));
+            .put(value, key);
           putRequest.onsuccess = () => {
             resolve(value);
           };
@@ -65,7 +63,7 @@ export class IDBDriver implements IDriver {
           const deleteRequest = this.db
             .transaction(this.options.storeName, IDB_MODE.READ_WRITE)
             .objectStore(this.options.storeName)
-            .delete(this.internalKeyGenerator(key));
+            .delete(key);
           deleteRequest.onsuccess = () => {
             resolve();
           };
@@ -102,6 +100,52 @@ export class IDBDriver implements IDriver {
     return executor();
   }
 
+  length(): Promise<number>;
+  length(onSuccess: (length: number) => void): void;
+  length(onSuccess?: (length: number) => void): void | Promise<number> {
+    const executor = () => {
+      return new Promise<number>(resolve => {
+        this.ready().then(() => {
+          const lengthRequest = this.db
+            .transaction(this.options.storeName, IDB_MODE.READ_ONLY)
+            .objectStore(this.options.storeName)
+            .count();
+          lengthRequest.onsuccess = () => {
+            resolve(lengthRequest.result);
+          };
+        });
+      });
+    };
+    if (onSuccess) {
+      executor().then(onSuccess);
+      return;
+    }
+    return executor();
+  }
+
+  keys(): Promise<string[]>;
+  keys(onSuccess: (keys: string[]) => void): void;
+  keys(onSuccess?: (keys: string[]) => void): void | Promise<string[]> {
+    const executor = () => {
+      return new Promise<string[]>(resolve => {
+        this.ready().then(() => {
+          const request = this.db
+            .transaction(this.options.storeName, IDB_MODE.READ_ONLY)
+            .objectStore(this.options.storeName)
+            .getAllKeys();
+          request.onsuccess = () => {
+            resolve(request.result.map(key => key + ''));
+          };
+        });
+      });
+    };
+    if (onSuccess) {
+      executor().then(onSuccess);
+      return;
+    }
+    return executor();
+  }
+
   ready(): Promise<void> {
     return new Promise(resolve => {
       if (this.db) {
@@ -123,10 +167,6 @@ export class IDBDriver implements IDriver {
         resolve();
       };
     });
-  }
-
-  private internalKeyGenerator(key: string): string {
-    return this.keyPrefix + key;
   }
 }
 
