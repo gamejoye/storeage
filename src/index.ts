@@ -40,44 +40,70 @@ class Storeage {
         ? this.configDriversSequence
         : this.defaultDriversSequence,
     };
-    const result = this.getDriver().config(options);
-    this.getDriver()
-      .ready()
-      .then(() => {
-        this.driverName = this.getDriver().driverName;
-      });
-    return result;
+    return this.getDriver().config(options);
   };
 
   getItem: IDriver['getItem'] = (...args) => {
-    return this.getDriver().getItem(...args);
+    return this.ready().then(() => {
+      const driver = this.getDriver();
+      this.driverName = driver.driverName;
+      return driver.getItem(...args);
+    });
   };
   setItem: IDriver['setItem'] = (...args) => {
-    return this.getDriver().setItem(...args);
+    return this.ready().then(() => {
+      const driver = this.getDriver();
+      this.driverName = driver.driverName;
+      return driver.setItem(...args);
+    });
   };
 
   removeItem: IDriver['removeItem'] = (...args) => {
-    return this.getDriver().removeItem(...args);
+    return this.ready().then(() => {
+      const driver = this.getDriver();
+      this.driverName = driver.driverName;
+      return driver.removeItem(...args);
+    });
   };
 
   clear: IDriver['clear'] = (...args) => {
-    return this.getDriver().clear(...args);
+    return this.ready().then(() => {
+      const driver = this.getDriver();
+      this.driverName = driver.driverName;
+      return driver.clear(...args);
+    });
   };
 
   ready: IDriver['ready'] = (...args) => {
-    return this.getDriver().ready(...args);
+    const driver = this.getDriver();
+    return driver.ready(...args).then(val => {
+      this.driverName = driver.driverName;
+      return val;
+    });
   };
 
   length: IDriver['length'] = (...args) => {
-    return this.getDriver().length(...args);
+    return this.ready().then(() => {
+      const driver = this.getDriver();
+      this.driverName = driver.driverName;
+      return driver.length(...args);
+    });
   };
 
   keys: IDriver['keys'] = (...args) => {
-    return this.getDriver().keys(...args);
+    return this.ready().then(() => {
+      const driver = this.getDriver();
+      this.driverName = driver.driverName;
+      return driver.keys(...args);
+    });
   };
 
   iterate: IDriver['iterate'] = (...args) => {
-    return this.getDriver().iterate(...args);
+    return this.ready().then(() => {
+      const driver = this.getDriver();
+      this.driverName = driver.driverName;
+      return driver.iterate(...args);
+    });
   };
 
   driver = () => {
