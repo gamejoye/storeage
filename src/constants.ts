@@ -15,3 +15,5 @@ export const INTERNAL_DRIVERS = {
   LOCALSTORAGE: 'localstorage',
   IDB: 'idb',
 } as const;
+
+export const ARRAY_BUFFER_PREFIX = '0:';

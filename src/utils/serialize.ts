@@ -12,12 +12,13 @@
 //   | 'Uint16Array'
 //   | 'Uint32Array';
 
+import { ARRAY_BUFFER_PREFIX } from '../constants';
+
 export function serialize(value: any): string {
   if (value === undefined) value = null;
   const type = Object.prototype.toString.call(value);
   if (type === '[object ArrayBuffer]') {
-    // TODO
-    return '';
+    return ARRAY_BUFFER_PREFIX + bufferToString(value);
   } else if (type === '[object Float32Array]') {
     // TODO
     return '';
@@ -51,4 +52,10 @@ export function serialize(value: any): string {
   } else {
     return JSON.stringify(value);
   }
+}
+
+function bufferToString(buffer: ArrayBuffer): string {
+  return Array.from(new Uint8Array(buffer))
+    .map(byte => String.fromCharCode(byte))
+    .join('');
 }

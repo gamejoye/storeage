@@ -25,6 +25,10 @@ async function testSetItem() {
 
   try {
     // 测试不同类型的数据
+    const uint8Array = new Uint8Array(3);
+    uint8Array[0] = 97;
+    uint8Array[1] = 98;
+    uint8Array[2] = 99;
     const testData = {
       string: 'Hello World',
       number: 42,
@@ -33,11 +37,18 @@ async function testSetItem() {
       boolean: true,
       undefined: undefined,
       null: null,
+      arrayBuffer: uint8Array.buffer,
     };
 
     for (const [key, value] of Object.entries(testData)) {
       await storeage.setItem(key, value);
-      showResult(`✅ Successfully stored ${key}: ${JSON.stringify(value)}`);
+      if (key === 'arrayBuffer') {
+        showResult(
+          `✅ Successfully stored ${key}: ${JSON.stringify(new Uint8Array(value as ArrayBuffer))}`
+        );
+      } else {
+        showResult(`✅ Successfully stored ${key}: ${JSON.stringify(value)}`);
+      }
     }
   } catch (error) {
     showResult(`❌ Error in setItem: ${error.message}`);
@@ -50,11 +61,24 @@ async function testGetItem() {
   showResult('Testing getItem...');
 
   try {
-    const keys = ['string', 'number', 'object', 'array', 'boolean', 'undefined', 'null'];
+    const keys = [
+      'string',
+      'number',
+      'object',
+      'array',
+      'boolean',
+      'undefined',
+      'null',
+      'arrayBuffer',
+    ] as const;
 
     for (const key of keys) {
       const value = await storeage.getItem(key);
-      showResult(`✅ Retrieved ${key}: ${JSON.stringify(value)}`);
+      if (key === 'arrayBuffer') {
+        showResult(`✅ Retrieved ${key}: ${JSON.stringify(new Uint8Array(value))}`);
+      } else {
+        showResult(`✅ Retrieved ${key}: ${JSON.stringify(value)}`);
+      }
       showResult(`⏰ type: ${typeof value}`);
       showResult('--------------------------------');
     }
