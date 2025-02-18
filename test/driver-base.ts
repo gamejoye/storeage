@@ -25,10 +25,15 @@ async function testSetItem() {
 
   try {
     // 测试不同类型的数据
-    const uint8Array = new Uint8Array(3);
-    uint8Array[0] = 97;
-    uint8Array[1] = 98;
-    uint8Array[2] = 99;
+    const float32Array = new Float32Array([-123.456, 0, 123.456]);
+    const float64Array = new Float64Array([-123456.789, 0, 123456.789]);
+    const int8Array = new Int8Array([-123, 0, 123]);
+    const int16Array = new Int16Array([-1000, 0, 1000]);
+    const int32Array = new Int32Array([-1000000, 0, 1000000]);
+    const uint8Array = new Uint8Array([97, 98, 99]);
+    const uint8ClampedArray = new Uint8ClampedArray([0, 128, 255, 300]);
+    const uint16Array = new Uint16Array([0, 32768, 65535]);
+    const uint32Array = new Uint32Array([0, 2147483648, 4294967295]);
     const testData = {
       string: 'Hello World',
       number: 42,
@@ -38,14 +43,38 @@ async function testSetItem() {
       undefined: undefined,
       null: null,
       arrayBuffer: uint8Array.buffer,
+      float32Array: float32Array,
+      float64Array: float64Array,
+      int8Array: int8Array,
+      int16Array: int16Array,
+      int32Array: int32Array,
+      uint8Array: uint8Array,
+      uint8ClampedArray: uint8ClampedArray,
+      uint16Array: uint16Array,
+      uint32Array: uint32Array,
     };
 
     for (const [key, value] of Object.entries(testData)) {
       await storeage.setItem(key, value);
       if (key === 'arrayBuffer') {
         showResult(
-          `✅ Successfully stored ${key}: ${JSON.stringify(new Uint8Array(value as ArrayBuffer))}`
+          // eslint-disable-next-line max-len
+          `✅ Successfully stored ${key}: ${JSON.stringify(Array.from(new Uint8Array(value as ArrayBuffer)))}`
         );
+      } else if (
+        [
+          'float32Array',
+          'float64Array',
+          'int8Array',
+          'int16Array',
+          'int32Array',
+          'uint8Array',
+          'uint8ClampedArray',
+          'uint16Array',
+          'uint32Array',
+        ].includes(key)
+      ) {
+        showResult(`✅ Successfully stored ${key}: ${JSON.stringify(Array.from(value as any))}`);
       } else {
         showResult(`✅ Successfully stored ${key}: ${JSON.stringify(value)}`);
       }
@@ -70,16 +99,39 @@ async function testGetItem() {
       'undefined',
       'null',
       'arrayBuffer',
+      'float32Array',
+      'float64Array',
+      'int8Array',
+      'int16Array',
+      'int32Array',
+      'uint8Array',
+      'uint8ClampedArray',
+      'uint16Array',
+      'uint32Array',
     ] as const;
 
     for (const key of keys) {
       const value = await storeage.getItem(key);
       if (key === 'arrayBuffer') {
-        showResult(`✅ Retrieved ${key}: ${JSON.stringify(new Uint8Array(value))}`);
+        showResult(`✅ Retrieved ${key}: ${JSON.stringify(Array.from(new Uint8Array(value)))}`);
+      } else if (
+        [
+          'float32Array',
+          'float64Array',
+          'int8Array',
+          'int16Array',
+          'int32Array',
+          'uint8Array',
+          'uint8ClampedArray',
+          'uint16Array',
+          'uint32Array',
+        ].includes(key)
+      ) {
+        showResult(`✅ Retrieved ${key}: ${JSON.stringify(Array.from(value))}`);
       } else {
         showResult(`✅ Retrieved ${key}: ${JSON.stringify(value)}`);
       }
-      showResult(`⏰ type: ${typeof value}`);
+      showResult(`⏰ type: ${Object.prototype.toString.call(value)}`);
       showResult('--------------------------------');
     }
 

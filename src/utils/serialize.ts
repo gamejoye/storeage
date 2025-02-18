@@ -12,46 +12,47 @@
 //   | 'Uint16Array'
 //   | 'Uint32Array';
 
-import { ARRAY_BUFFER_PREFIX } from '../constants';
+import {
+  ARRAY_BUFFER_PREFIX,
+  FLOAT32_ARRAY_PREFIX,
+  FLOAT64_ARRAY_PREFIX,
+  INT8_ARRAY_PREFIX,
+  INT16_ARRAY_PREFIX,
+  INT32_ARRAY_PREFIX,
+  UINT8_ARRAY_PREFIX,
+  UINT8_CLAMPED_ARRAY_PREFIX,
+  UINT16_ARRAY_PREFIX,
+  UINT32_ARRAY_PREFIX,
+} from '../constants';
+
+const prefixMap = {
+  '[object Float32Array]': FLOAT32_ARRAY_PREFIX,
+  '[object Float64Array]': FLOAT64_ARRAY_PREFIX,
+  '[object Int8Array]': INT8_ARRAY_PREFIX,
+  '[object Int16Array]': INT16_ARRAY_PREFIX,
+  '[object Int32Array]': INT32_ARRAY_PREFIX,
+  '[object Uint8Array]': UINT8_ARRAY_PREFIX,
+  '[object Uint8ClampedArray]': UINT8_CLAMPED_ARRAY_PREFIX,
+  '[object Uint16Array]': UINT16_ARRAY_PREFIX,
+  '[object Uint32Array]': UINT32_ARRAY_PREFIX,
+};
 
 export function serialize(value: any): string {
   if (value === undefined) value = null;
+  let prefix = '';
   const type = Object.prototype.toString.call(value);
   if (type === '[object ArrayBuffer]') {
     return ARRAY_BUFFER_PREFIX + bufferToString(value);
-  } else if (type === '[object Float32Array]') {
-    // TODO
-    return '';
-  } else if (type === '[object Float64Array]') {
-    // TODO
-    return '';
-  } else if (type === '[object Int8Array]') {
-    // TODO
-    return '';
-  } else if (type === '[object Int16Array]') {
-    // TODO
-    return '';
-  } else if (type === '[object Int32Array]') {
-    // TODO
-    return '';
-  } else if (type === '[object Uint8Array]') {
-    // TODO
-    return '';
-  } else if (type === '[object Uint8ClampedArray]') {
-    // TODO
-    return '';
-  } else if (type === '[object Uint16Array]') {
-    // TODO
-    return '';
-  } else if (type === '[object Uint32Array]') {
-    // TODO
-    return '';
   } else if (type === '[object Blob]') {
     // TODO
     return '';
   } else {
-    return JSON.stringify(value);
+    prefix = prefixMap[type as keyof typeof prefixMap] ?? '';
   }
+  if (prefix) {
+    return prefix + JSON.stringify(Array.from(value));
+  }
+  return JSON.stringify(value);
 }
 
 function bufferToString(buffer: ArrayBuffer): string {
