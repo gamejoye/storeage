@@ -7,9 +7,6 @@ currentDriver.textContent = storeage.driver() + '';
   await storeage
     .iterate((key, value, index) => {
       console.log('=> ', index, key, value);
-      if (index === 3) {
-        return [key, value];
-      }
     })
     .then(result => {
       console.log('done', result);
@@ -17,15 +14,19 @@ currentDriver.textContent = storeage.driver() + '';
       console.log('--------------------------------');
     });
 
-  await storeage
-    .iterate((key, value, index) => {
+  storeage.iterate(
+    (key, value, index) => {
       console.log('=> ', index, key, value);
-    })
-    .then(result => {
+      if (index === 3) {
+        return [key, value];
+      }
+    },
+    result => {
       console.log('done', result);
       console.log('--------------------------------');
       console.log('--------------------------------');
-    });
+    }
+  );
 })();
 
 storeage.ready().then(() => {
@@ -142,7 +143,7 @@ async function testGetItem() {
     ] as const;
 
     for (const key of keys) {
-      const value = await storeage.getItem(key);
+      const value = await storeage.getItem<any>(key);
       if (key === 'arrayBuffer') {
         showResult(`✅ Retrieved ${key}: ${JSON.stringify(Array.from(new Uint8Array(value)))}`);
       } else if (

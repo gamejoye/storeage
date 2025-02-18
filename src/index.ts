@@ -43,68 +43,129 @@ class Storeage {
     return this.getDriver().config(options);
   };
 
-  getItem: IDriver['getItem'] = (...args) => {
-    return this.ready().then(() => {
+  getItem<T>(key: string): Promise<T>;
+  getItem<T>(key: string, onSuccess: (value: T) => void): void;
+  getItem<T>(key: string, onSuccess?: (value: T) => void): void | Promise<T> {
+    const executor = async () => {
+      await this.ready();
       const driver = this.getDriver();
       this.driverName = driver.driverName;
-      return driver.getItem(...args);
-    });
-  };
-  setItem: IDriver['setItem'] = (...args) => {
-    return this.ready().then(() => {
-      const driver = this.getDriver();
-      this.driverName = driver.driverName;
-      return driver.setItem(...args);
-    });
-  };
+      return driver.getItem<T>(key);
+    };
+    if (onSuccess) {
+      executor().then(onSuccess);
+      return;
+    }
+    return executor();
+  }
 
-  removeItem: IDriver['removeItem'] = (...args) => {
-    return this.ready().then(() => {
+  setItem<T>(key: string, value: T): Promise<T>;
+  setItem<T>(key: string, value: T, onSuccess: (value: T) => void): void;
+  setItem<T>(key: string, value: T, onSuccess?: (value: T) => void): void | Promise<T> {
+    const executor = async () => {
+      await this.ready();
       const driver = this.getDriver();
       this.driverName = driver.driverName;
-      return driver.removeItem(...args);
-    });
-  };
+      return driver.setItem<T>(key, value);
+    };
+    if (onSuccess) {
+      executor().then(onSuccess);
+      return;
+    }
+    return executor();
+  }
 
-  clear: IDriver['clear'] = (...args) => {
-    return this.ready().then(() => {
+  removeItem(key: string): Promise<void>;
+  removeItem(key: string, onSuccess: () => void): void;
+  removeItem(key: string, onSuccess?: () => void): void | Promise<void> {
+    const executor = async () => {
+      await this.ready();
       const driver = this.getDriver();
       this.driverName = driver.driverName;
-      return driver.clear(...args);
-    });
-  };
+      return driver.removeItem(key);
+    };
+    if (onSuccess) {
+      executor().then(onSuccess);
+      return;
+    }
+    return executor();
+  }
 
-  ready: IDriver['ready'] = (...args) => {
+  clear(): Promise<void>;
+  clear(onSuccess: () => void): void;
+  clear(onSuccess?: () => void): void | Promise<void> {
+    const executor = async () => {
+      await this.ready();
+      const driver = this.getDriver();
+      this.driverName = driver.driverName;
+      return driver.clear();
+    };
+    if (onSuccess) {
+      executor().then(onSuccess);
+      return;
+    }
+    return executor();
+  }
+
+  async ready() {
     const driver = this.getDriver();
-    return driver.ready(...args).then(val => {
-      this.driverName = driver.driverName;
-      return val;
-    });
-  };
+    await driver.ready();
+    this.driverName = driver.driverName;
+  }
 
-  length: IDriver['length'] = (...args) => {
-    return this.ready().then(() => {
+  length(): Promise<number>;
+  length(onSuccess: (length: number) => void): void;
+  length(onSuccess?: (length: number) => void): void | Promise<number> {
+    const executor = async () => {
+      await this.ready();
       const driver = this.getDriver();
       this.driverName = driver.driverName;
-      return driver.length(...args);
-    });
-  };
+      return driver.length();
+    };
+    if (onSuccess) {
+      executor().then(onSuccess);
+      return;
+    }
+    return executor();
+  }
 
-  keys: IDriver['keys'] = (...args) => {
-    return this.ready().then(() => {
+  keys(): Promise<string[]>;
+  keys(onSuccess: (keys: string[]) => void): void;
+  keys(onSuccess?: (keys: string[]) => void): void | Promise<string[]> {
+    const executor = async () => {
+      await this.ready();
       const driver = this.getDriver();
       this.driverName = driver.driverName;
-      return driver.keys(...args);
-    });
-  };
+      return driver.keys();
+    };
+    if (onSuccess) {
+      executor().then(onSuccess);
+      return;
+    }
+    return executor();
+  }
 
-  iterate: IDriver['iterate'] = (...args) => {
-    return this.ready().then(() => {
+  iterate<T, U>(callback: (key: string, value: T, index: number) => U): Promise<U | void>;
+  iterate<T, U>(
+    callback: (key: string, value: T, index: number) => U | void,
+    onSuccess: (result: U | void) => void
+  ): void;
+  iterate<T, U>(
+    callback: (key: string, value: T, index: number) => U | void,
+    onSuccess?: (result: U | void) => void
+  ): void | Promise<U | void> {
+    const executor = async () => {
+      await this.ready();
       const driver = this.getDriver();
       this.driverName = driver.driverName;
-      return driver.iterate(...args);
-    });
-  };
+      return driver.iterate<T, U>(callback);
+    };
+    if (onSuccess) {
+      executor().then(onSuccess);
+      return;
+    }
+    return executor();
+  }
 
   driver = () => {
     return this.driverName;
