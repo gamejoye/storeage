@@ -1,15 +1,19 @@
-import { idbDriver } from './drivers/idb';
-import { localstorageDriver } from './drivers/localstorage';
-import { INTERNAL_DRIVERS } from './constants';
+import IDBDriver from './drivers/idb';
+import LocalStorageDriver from './drivers/localstorage';
+import { DEFAULT_CONFIG, INTERNAL_DRIVERS } from './constants';
 
 class Storeage {
-  private driversMap: [string, IDriver][] = [
-    [INTERNAL_DRIVERS.IDB, idbDriver],
-    [INTERNAL_DRIVERS.LOCALSTORAGE, localstorageDriver],
-  ];
+  private driversMap: [string, IDriver][];
   private defaultDriversSequence = [INTERNAL_DRIVERS.IDB, INTERNAL_DRIVERS.LOCALSTORAGE];
   private configDriversSequence: string[] = [];
   private driverName: string | null = null;
+
+  constructor() {
+    this.driversMap = [
+      [INTERNAL_DRIVERS.IDB, new IDBDriver()],
+      [INTERNAL_DRIVERS.LOCALSTORAGE, new LocalStorageDriver()],
+    ];
+  }
 
   getDriver() {
     for (const driver of this.configDriversSequence) {
@@ -26,8 +30,7 @@ class Storeage {
       }
     }
 
-    // 如果没有任何驱动程序支持，则使用 localstorage 驱动程序
-    return localstorageDriver;
+    throw new Error('No driver supported');
   }
 
   config: IDriver['config'] = (options: ConfigOptions) => {
@@ -165,6 +168,13 @@ class Storeage {
       return;
     }
     return executor();
+  }
+
+  createInstance(config: ConfigOptions = {}): Storeage {
+    config = { ...DEFAULT_CONFIG, ...config };
+    const instance = new Storeage();
+    instance.config(config);
+    return instance;
   }
 
   driver = () => {

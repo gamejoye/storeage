@@ -11,7 +11,15 @@
       border: 1px solid #ccc;
       background: #f5f5f5;
     }
-
+    .store-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #eee;
+    }
+    .store-title {
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
     button {
       margin: 5px;
       padding: 5px 10px;
@@ -21,32 +29,189 @@
 
 <body>
   <h2>LocalStorage Driver Test</h2>
-  <h3>Current Driver: <span id="currentDriver"></span></h3>
-  <h3>Length: <span id="length"></span></h3>
-  <h3>Keys: <span id="keys"></span></h3>
+  
+  <!-- 主存储区 -->
+  <div class="store-section">
+    <div class="store-title">Main Store (testStore)</div>
+    <h3>Current Driver: <span id="currentDriver"></span></h3>
+    <h3>Length: <span id="length"></span></h3>
+    <h3>Keys: <span id="keys"></span></h3>
 
-  <div>
-    <button id="setItem">Test setItem</button>
-    <button id="getItem">Test getItem</button>
-    <button id="removeItem">Test removeItem</button>
-    <button id="clear">Test clear</button>
+    <div>
+      <button id="setItem">Test setItem</button>
+      <button id="getItem">Test getItem</button>
+      <button id="removeItem">Test removeItem</button>
+      <button id="clear">Test clear</button>
+    </div>
+
+    <div>
+      <h3>Test Results:</h3>
+      <pre id="result" class="result"></pre>
+    </div>
   </div>
 
-  <div>
-    <h3>Test Results:</h3>
-    <pre id="result" class="result"></pre>
+  <!-- 另一个存储区 -->
+  <div class="store-section">
+    <div class="store-title">Another Store (anotherStore)</div>
+    <h3>Length: <span id="another-length">0</span></h3>
+    <h3>Keys: <span id="another-keys"></span></h3>
+
+    <div>
+      <button id="another-setItem">Test setItem</button>
+      <button id="another-getItem">Test getItem</button>
+      <button id="another-removeItem">Test removeItem</button>
+      <button id="another-clear">Test clear</button>
+    </div>
+
+    <div>
+      <h3>Test Results:</h3>
+      <pre id="another-result" class="result"></pre>
+    </div>
   </div>
 
   <script type="module">
     import storeage from '../src/index.ts';
 
-    // 配置 driver
+    // 配置主存储
     storeage.config({
       name: 'testDB',
-      driver: ['localstorage'],
       storeName: 'testStore',
+      driver: ['localstorage'],
       version: 2
     });
+
+    // 创建另一个存储实例
+    const anotherStore = storeage.createInstance({
+      name: 'testDB',
+      storeName: 'anotherStore',
+      driver: ['localstorage'],
+      version: 2
+    });
+
+    // 测试另一个存储的函数
+    function showAnotherResult(message) {
+      const result = document.getElementById('another-result');
+      result.textContent += message + '\n';
+    }
+
+    function clearAnotherResult() {
+      document.getElementById('another-result').textContent = '';
+    }
+
+    async function updateAnotherStoreInfo() {
+      const length = await anotherStore.length();
+      const keys = await anotherStore.keys();
+      document.getElementById('another-length').textContent = length;
+      document.getElementById('another-keys').textContent = keys.join(', ');
+    }
+
+    // 测试另一个存储的 setItem
+    async function testAnotherSetItem() {
+      clearAnotherResult();
+      showAnotherResult('Testing setItem in anotherStore...');
+      
+      try {
+        const testData = {
+          string: 'Hello from another store',
+          number: 100,
+          object: { name: 'AnotherTest', value: 200 }
+        };
+
+        for (const [key, value] of Object.entries(testData)) {
+          await anotherStore.setItem(key, value);
+          showAnotherResult(`✅ Successfully stored ${key}: ${JSON.stringify(value)}`);
+        }
+        await updateAnotherStoreInfo();
+      } catch (error) {
+        showAnotherResult(`❌ Error in setItem: ${error.message}`);
+      }
+    }
+
+    // 测试另一个存储的 getItem
+    async function testAnotherGetItem() {
+      clearAnotherResult();
+      showAnotherResult('Testing getItem in anotherStore...');
+      
+      try {
+        const keys = ['string', 'number', 'object'];
+        
+        for (const key of keys) {
+          const value = await anotherStore.getItem(key);
+          showAnotherResult(`✅ Retrieved ${key}: ${JSON.stringify(value)}`);
+        }
+      } catch (error) {
+        showAnotherResult(`❌ Error in getItem: ${error.message}`);
+      }
+    }
+
+    // 测试另一个存储的 removeItem
+    async function testAnotherRemoveItem() {
+      clearAnotherResult();
+      showAnotherResult('Testing removeItem in anotherStore...');
+      
+      try {
+        await anotherStore.setItem('testRemove', 'test value');
+        showAnotherResult('✅ Added test item');
+
+        await anotherStore.removeItem('testRemove');
+        showAnotherResult('✅ Removed test item');
+
+        const value = await anotherStore.getItem('testRemove');
+        showAnotherResult(`✅ Verification: item is ${value === null ? 'successfully removed' : 'still present'}`);
+        await updateAnotherStoreInfo();
+      } catch (error) {
+        showAnotherResult(`❌ Error in removeItem: ${error.message}`);
+      }
+    }
+
+    // 测试另一个存储的 clear
+    async function testAnotherClear() {
+      clearAnotherResult();
+      showAnotherResult('Testing clear in anotherStore...');
+      
+      try {
+        await anotherStore.setItem('test1', 'value1');
+        await anotherStore.setItem('test2', 'value2');
+        showAnotherResult('✅ Added test items');
+
+        await anotherStore.clear();
+        showAnotherResult('✅ Cleared all items');
+
+        const value1 = await anotherStore.getItem('test1');
+        const value2 = await anotherStore.getItem('test2');
+        showAnotherResult(`✅ Verification: items are ${value1 === null && value2 === null ? 'successfully cleared' : 'still present'}`);
+        await updateAnotherStoreInfo();
+      } catch (error) {
+        showAnotherResult(`❌ Error in clear: ${error.message}`);
+      }
+    }
+
+    // dropInstance 测试
+    async function testDropInstance() {
+      try {
+        // 删除 testStore
+        await storeage.dropInstance({
+          name: 'testDB',
+          storeName: 'testStore'
+        });
+        showResult('✅ Successfully dropped testStore');
+        
+        // 验证 anotherStore 是否还在
+        const anotherValue = await anotherStore.getItem('string');
+        showAnotherResult(`✅ anotherStore after drop: ${anotherValue !== null ? 'still exists' : 'was affected'}`);
+        
+        await updateAnotherStoreInfo();
+      } catch (error) {
+        showResult(`❌ Error in dropInstance: ${error.message}`);
+      }
+    }
+
+    // 添加事件监听器
+    document.getElementById('another-setItem').addEventListener('click', testAnotherSetItem);
+    document.getElementById('another-getItem').addEventListener('click', testAnotherGetItem);
+    document.getElementById('another-removeItem').addEventListener('click', testAnotherRemoveItem);
+    document.getElementById('another-clear').addEventListener('click', testAnotherClear);
+    // document.getElementById('dropInstance').addEventListener('click', testDropInstance);
   </script>
   <script type="module" src="./driver-base.ts"></script>
 </body>

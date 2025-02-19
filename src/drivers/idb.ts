@@ -1,6 +1,9 @@
 import { DEFAULT_CONFIG, IDB_MODE } from '../constants';
+import { once } from '../utils';
 
-export class IDBDriver implements IDriver {
+const idbDriverMap = new Map<string, IDBDriver[]>();
+
+class IDBDriver implements IDriver {
   private options: Required<ConfigOptions> = DEFAULT_CONFIG;
   private db!: IDBDatabase;
   driverName = 'IndexedDBStorage';
@@ -109,22 +112,64 @@ export class IDBDriver implements IDriver {
     });
   }
 
-  ready(): Promise<void> {
-    return new Promise(resolve => {
-      if (this.db) {
-        resolve();
-        return;
-      }
-      const request = indexedDB.open(this.options.name, this.options.version);
+  close() {
+    if (this.db) {
+      this.db.close();
+    }
+  }
+
+  ready: () => Promise<void> = once(() => {
+    const drivers = idbDriverMap.get(this.options.name) || [];
+    idbDriverMap.set(this.options.name, [...drivers, this]);
+    return new Promise<void>((resolve, reject) => {
+      const request = indexedDB.open(this.options.name);
       /**
        * 执行顺序
        * onupgradeneeded（如果有新的版本号或者新建数据库）
        * onsuccess
        */
-      request.onupgradeneeded = e => {
-        const db = (e.target as any).result as IDBDatabase;
-        db.createObjectStore(this.options.storeName);
+      request.onerror = () => {
+        reject(new Error('open database error'));
       };
+      request.onsuccess = () => {
+        const names = request.result.objectStoreNames;
+        const version = request.result.version;
+        if (!names.contains(this.options.storeName)) {
+          // 关闭所有连接 防止升级被阻塞
+          const otherDrivers = (idbDriverMap.get(this.options.name) || []).filter(
+            driver => driver !== this
+          );
+          request.result.close();
+          otherDrivers.forEach(driver => driver.close());
+
+          const upgradeRequest = indexedDB.open(this.options.name, version + 1);
+
+          upgradeRequest.onerror = () => {
+            reject(new Error('upgrade database error'));
+          };
+
+          // 升级数据库 创建存储
+          upgradeRequest.onupgradeneeded = e => {
+            const db = (e.target as any).result as IDBDatabase;
+            db.createObjectStore(this.options.storeName);
+          };
+          upgradeRequest.onsuccess = () => {
+            this.db = upgradeRequest.result;
+            otherDrivers.forEach(driver => driver.reconnect());
+            resolve();
+          };
+        } else {
+          this.db = request.result;
+          this.db.addEventListener('close', this.reconnect);
+          resolve();
+        }
+      };
+    });
+  });
+
+  private reconnect(): Promise<void> {
+    return new Promise<void>(resolve => {
+      const request = indexedDB.open(this.options.name);
       request.onsuccess = () => {
         this.db = request.result;
         resolve();

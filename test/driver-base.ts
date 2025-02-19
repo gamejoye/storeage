@@ -144,7 +144,9 @@ async function testGetItem() {
 
     for (const key of keys) {
       const value = await storeage.getItem<any>(key);
-      if (key === 'arrayBuffer') {
+      if (value === null) {
+        showResult(`✅ Retrieved ${key}: ${JSON.stringify(value)}`);
+      } else if (key === 'arrayBuffer') {
         showResult(`✅ Retrieved ${key}: ${JSON.stringify(Array.from(new Uint8Array(value)))}`);
       } else if (
         [
