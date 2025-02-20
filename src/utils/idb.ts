@@ -12,27 +12,31 @@ export function getIDBVersion(name: string): Promise<number> {
   });
 }
 
+const INDEXED_DB_LOCAL_STORAGE_PREFIX = '__storeage_indexed_db_versions__/';
+
 export async function workInVersionChange<T>(
   name: string,
   before: () => void,
   callback: (request: IDBOpenDBRequest) => T,
   after: (val: T) => void
 ) {
-  return getIDBVersion(name).then<T>(version => {
-    return new Promise<T>((resolve, reject) => {
-      before();
-      const request = indexedDB.open(name, version + 1);
-      let result!: T;
-      request.onupgradeneeded = () => {
-        result = callback(request);
-      };
-      request.onsuccess = () => {
-        after(result);
-        resolve(result);
-      };
-      request.onerror = () => {
-        reject(new Error('upgrade database error'));
-      };
-    });
+  return new Promise<T>((resolve, reject) => {
+    before();
+    const version = parseInt(localStorage.getItem(INDEXED_DB_LOCAL_STORAGE_PREFIX + name) ?? '1');
+    const request = indexedDB.open(name, version + 1);
+    localStorage.setItem(INDEXED_DB_LOCAL_STORAGE_PREFIX + name, version + 1 + '');
+    let result!: T;
+    request.onupgradeneeded = () => {
+      result = callback(request);
+    };
+    request.onsuccess = () => {
+      after(result);
+      resolve(result);
+      request.result.close();
+    };
+    request.onerror = () => {
+      reject(new Error('upgrade database error'));
+      request.result.close();
+    };
   });
 }
