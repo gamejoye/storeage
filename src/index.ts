@@ -177,6 +177,29 @@ class Storeage {
     return instance;
   }
 
+  dropInstance(config?: DropInstanceOptions): Promise<void> {
+    if (!config) {
+      // 如果没有传入config，则删除当前实例的name/storeName
+      return this.getDriver().drop();
+    }
+
+    if (config.name && config.storeName) {
+      const instance = this.createInstance({
+        name: config.name,
+        storeName: config.storeName,
+      });
+      return instance.dropInstance();
+    }
+
+    if (config.name && !config.storeName) {
+      // TODO
+      // 删除整个name下的所有storeName
+    }
+
+    console.warn('dropInstance config error', config);
+    return Promise.reject(new Error('dropInstance config error'));
+  }
+
   driver = () => {
     return this.driverName;
   };

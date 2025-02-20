@@ -1,5 +1,5 @@
 import { DEFAULT_CONFIG, IDB_MODE } from '../constants';
-import { once } from '../utils';
+import { once, workInVersionChange } from '../utils';
 
 const idbDriverMap = new Map<string, IDBDriver[]>();
 
@@ -112,11 +112,48 @@ class IDBDriver implements IDriver {
     });
   }
 
-  close() {
+  drop(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.ready().then(async () => {
+        const { name, storeName } = this.options;
+
+        if (!storeName) {
+          // TODO
+          // 删除数据库
+          const request = indexedDB.deleteDatabase(name);
+          request.onerror = () => {
+            reject(new Error('drop database error'));
+          };
+          request.onsuccess = () => {
+            resolve();
+          };
+          return;
+        }
+
+        const driversToClose = idbDriverMap.get(name) ?? [];
+        workInVersionChange(
+          name,
+          () => {},
+          request => {
+            const db = request.result as IDBDatabase;
+            db.deleteObjectStore(storeName);
+          },
+          async () => {
+            const driversToReconnect = driversToClose.filter(driver => driver !== this);
+            idbDriverMap.set(name, driversToReconnect);
+            await Promise.all(driversToReconnect.map(driver => driver.reconnect()));
+            resolve();
+          }
+        );
+      });
+    });
+  }
+
+  close = () => {
     if (this.db) {
       this.db.close();
     }
-  }
+  };
 
   ready: () => Promise<void> = once(() => {
     const drivers = idbDriverMap.get(this.options.name) || [];
@@ -133,36 +170,35 @@ class IDBDriver implements IDriver {
       };
       request.onsuccess = () => {
         const names = request.result.objectStoreNames;
-        const version = request.result.version;
         if (!names.contains(this.options.storeName)) {
           // 关闭所有连接 防止升级被阻塞
           const otherDrivers = (idbDriverMap.get(this.options.name) || []).filter(
             driver => driver !== this
           );
-          request.result.close();
-          otherDrivers.forEach(driver => driver.close());
-
-          const upgradeRequest = indexedDB.open(this.options.name, version + 1);
-
-          upgradeRequest.onerror = () => {
-            reject(new Error('upgrade database error'));
-          };
-
-          // 升级数据库 创建存储
-          upgradeRequest.onupgradeneeded = e => {
-            const db = (e.target as any).result as IDBDatabase;
-            db.createObjectStore(this.options.storeName);
-          };
-          upgradeRequest.onsuccess = () => {
-            this.db = upgradeRequest.result;
-            otherDrivers.forEach(driver => driver.reconnect());
-            resolve();
-          };
+          workInVersionChange(
+            this.options.name,
+            () => {
+              request.result.close();
+            },
+            request => {
+              const db = request.result as IDBDatabase;
+              db.createObjectStore(this.options.storeName);
+              return request;
+            },
+            async upgradeRequest => {
+              this.db = upgradeRequest.result;
+              await Promise.all(otherDrivers.map(driver => driver.reconnect()));
+              resolve();
+            }
+          );
         } else {
           this.db = request.result;
-          this.db.addEventListener('close', this.reconnect);
           resolve();
         }
+      };
+    }).then(() => {
+      this.db.onversionchange = () => {
+        this.close();
       };
     });
   });
@@ -172,6 +208,7 @@ class IDBDriver implements IDriver {
       const request = indexedDB.open(this.options.name);
       request.onsuccess = () => {
         this.db = request.result;
+        this.db.onversionchange = this.close;
         resolve();
       };
     });
@@ -179,4 +216,3 @@ class IDBDriver implements IDriver {
 }
 
 export default IDBDriver;
-export const idbDriver = new IDBDriver();

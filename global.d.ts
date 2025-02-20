@@ -5,6 +5,11 @@ interface ConfigOptions {
   version?: number;
 }
 
+interface DropInstanceOptions {
+  name?: string;
+  storeName?: string;
+}
+
 interface IDriver {
   driverName: string;
 
@@ -25,6 +30,8 @@ interface IDriver {
   iterate: <T, U>(
     callback: (key: string, value: T, index: number) => U | void
   ) => Promise<U | void>;
+
+  drop: () => Promise<void>;
 
   ready: () => Promise<void>;
 }

@@ -1,7 +1,7 @@
 import { DEFAULT_CONFIG } from '../constants';
 import { deserialize, serialize } from '../utils';
 
-export class LocalStorageDriver implements IDriver {
+class LocalStorageDriver implements IDriver {
   private options: Required<ConfigOptions> = DEFAULT_CONFIG;
   private keyPrefix: string = '';
   driverName = 'LocalStorageStorage';
@@ -25,8 +25,9 @@ export class LocalStorageDriver implements IDriver {
     return Promise.resolve();
   }
 
-  clear(): Promise<void> {
-    localStorage.clear();
+  async clear(): Promise<void> {
+    const keys = await this.keys();
+    await Promise.all(keys.map(key => this.removeItem(key)));
     return Promise.resolve();
   }
 
@@ -34,7 +35,7 @@ export class LocalStorageDriver implements IDriver {
     let count = 0;
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && this.isBelongsToStore(key)) {
+      if (key && this.isBelongsToStore(key, this.options.name, this.options.storeName)) {
         count++;
       }
     }
@@ -45,7 +46,7 @@ export class LocalStorageDriver implements IDriver {
     const keys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && this.isBelongsToStore(key)) {
+      if (key && this.isBelongsToStore(key, this.options.name, this.options.storeName)) {
         keys.push(this.decodeInternalKey(key));
       }
     }
@@ -64,6 +65,32 @@ export class LocalStorageDriver implements IDriver {
     }
   }
 
+  async drop(): Promise<void> {
+    const { name, storeName } = this.options;
+
+    if (!storeName) {
+      // TODO
+      const keys: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && this.isBelongsToDatabase(key, name)) {
+          keys.push(key);
+        }
+      }
+      await Promise.all(keys.map(key => this.removeItem(key)));
+      return;
+    }
+
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && this.isBelongsToStore(key, name, storeName)) {
+        keysToRemove.push(this.decodeInternalKey(key));
+      }
+    }
+    await Promise.all(keysToRemove.map(key => this.removeItem(key)));
+  }
+
   ready(): Promise<void> {
     return Promise.resolve();
   }
@@ -76,10 +103,13 @@ export class LocalStorageDriver implements IDriver {
     return internalKey.slice(this.keyPrefix.length);
   }
 
-  private isBelongsToStore(key: string): boolean {
-    return key.startsWith(this.keyPrefix);
+  private isBelongsToStore(key: string, databaseName: string, storeName: string): boolean {
+    return key.startsWith(`${databaseName}/${storeName}/`);
+  }
+
+  private isBelongsToDatabase(key: string, databaseName: string): boolean {
+    return key.startsWith(databaseName);
   }
 }
 
 export default LocalStorageDriver;
-export const localstorageDriver = new LocalStorageDriver();
