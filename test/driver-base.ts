@@ -50,6 +50,13 @@ function clearResult() {
   document.getElementById('result')!.textContent = '';
 }
 
+function testDropInstance() {
+  storeage.dropInstance().then(() => {
+    clearResult();
+    showResult('✅ Successfully dropped testStore');
+  });
+}
+
 // 测试 setItem
 async function testSetItem() {
   clearResult();
@@ -235,3 +242,4 @@ document.getElementById('setItem')!.addEventListener('click', testSetItem);
 document.getElementById('getItem')!.addEventListener('click', testGetItem);
 document.getElementById('removeItem')!.addEventListener('click', testRemoveItem);
 document.getElementById('clear')!.addEventListener('click', testClear);
+document.getElementById('dropInstance')!.addEventListener('click', testDropInstance);

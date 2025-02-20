@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Storeage Instance Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+    }
+    h2 {
+      color: #333;
+    }
+    button {
+      margin: 10px 0;
+      padding: 10px 20px;
+      font-size: 16px;
+      color: #fff;
+      background-color: #007bff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+    button:hover:not(:disabled) {
+      background-color: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .instance {
+      margin-bottom: 20px;
+    }
+    #error {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>Storeage Instance Test</h2>
+  <div class="instance">
+    <button id="runMainTest">Run Main Test</button>
+    <span id="main-instance" class="result">main instance loading</span>
+    <span id="main-instance-drop-status" class="result">drop status</span>
+  </div>
+  <div class="instance">
+    <button id="runInstance1Test">Run Instance 1 Test</button>
+    <span id="instance1" class="result">instance 1 loading</span>
+    <span id="instance1-drop-status" class="result">drop status</span>
+  </div>
+  <div class="instance">
+    <button id="runInstance2Test">Run Instance 2 Test</button>
+    <span id="instance2" class="result">instance 2 loading</span>
+    <span id="instance2-drop-status" class="result">drop status</span>
+  </div>
+  <div class="instance">
+    <button id="runInstance3Test">Run Instance 3 Test</button>
+    <span id="instance3" class="result">instance 3 loading</span>
+    <span id="instance3-drop-status" class="result">drop status</span>
+  </div>
+  <div id="error"></div>
+
+  <script type="module" src="./drop-instance.ts"></script>
+</body>
+</html>
