@@ -172,9 +172,6 @@ class IDBDriver implements IDriver {
         const names = request.result.objectStoreNames;
         if (!names.contains(this.options.storeName)) {
           // 关闭所有连接 防止升级被阻塞
-          const otherDrivers = (idbDriverMap.get(this.options.name) || []).filter(
-            driver => driver !== this
-          );
           workInVersionChange(
             this.options.name,
             () => {
@@ -183,11 +180,11 @@ class IDBDriver implements IDriver {
             request => {
               const db = request.result as IDBDatabase;
               db.createObjectStore(this.options.storeName);
-              return request;
             },
-            async upgradeRequest => {
-              this.db = upgradeRequest.result;
-              await Promise.all(otherDrivers.map(driver => driver.reconnect()));
+            async () => {
+              const driversToReconnect = idbDriverMap.get(this.options.name) || [];
+              // 重新连接（包括当前实例）
+              await Promise.all(driversToReconnect.map(driver => driver.reconnect()));
               resolve();
             }
           );
@@ -197,9 +194,7 @@ class IDBDriver implements IDriver {
         }
       };
     }).then(() => {
-      this.db.onversionchange = () => {
-        this.close();
-      };
+      this.db.onversionchange = this.close;
     });
   });
 
