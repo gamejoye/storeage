@@ -1,4 +1,4 @@
-import storeage from '../src/index.ts';
+import storeage from '../src/index';
 
 const currentDriver = document.getElementById('currentDriver')!;
 currentDriver.textContent = storeage.driver() + '';
@@ -40,7 +40,7 @@ storeage.ready().then(() => {
 });
 
 // 用于显示结果
-function showResult(message) {
+function showResult(message: string) {
   const result = document.getElementById('result')!;
   result.textContent += message + '\n';
 }
@@ -119,7 +119,7 @@ async function testSetItem() {
       }
     }
   } catch (error) {
-    showResult(`❌ Error in setItem: ${error.message}`);
+    showResult(`❌ Error in setItem: ${(error as Error).message}`);
   }
 }
 
@@ -180,7 +180,7 @@ async function testGetItem() {
     const nonExistent = await storeage.getItem('nonexistent');
     showResult(`✅ Non-existent key test: ${nonExistent === null ? 'passed' : 'failed'}`);
   } catch (error) {
-    showResult(`❌ Error in getItem: ${error.message}`);
+    showResult(`❌ Error in getItem: ${(error as Error).message}`);
   }
 }
 
@@ -206,7 +206,7 @@ async function testRemoveItem() {
       `✅ Verification: item is ${value === null ? 'successfully removed' : 'still present'}`
     );
   } catch (error) {
-    showResult(`❌ Error in removeItem: ${error.message}`);
+    showResult(`❌ Error in removeItem: ${(error as Error).message}`);
   }
 }
 
@@ -233,7 +233,7 @@ async function testClear() {
       `✅ Verification: items are ${value1 === null && value2 === null ? 'successfully cleared' : 'still present'}`
     );
   } catch (error) {
-    showResult(`❌ Error in clear: ${error.message}`);
+    showResult(`❌ Error in clear: ${(error as Error).message}`);
   }
 }
 

@@ -1,4 +1,4 @@
-import storeage from '../src/index.ts';
+import storeage from '../src/index';
 
 // 创建第一个实例，属于数据库 "testDB1"
 const instance1 = storeage.createInstance({
@@ -86,7 +86,7 @@ async function dropInstanceWithLoading(buttonId: string, instance: any, resultId
     await instance.dropInstance();
     result.textContent = '✅ Successfully dropped instance';
   } catch (error) {
-    result.textContent = `❌ Error: ${error.message}`;
+    result.textContent = `❌ Error: ${(error as Error).message}`;
   } finally {
     button.disabled = false;
   }
