@@ -41,6 +41,28 @@ export async function workInVersionChange<T>(
   });
 }
 
+const openSymbol = Symbol('open');
+
 export function getIDB(): IDBFactory | null {
-  return indexedDB;
+  let factory: IDBFactory | null = null;
+  if ('indexedDB' in window) {
+    factory = window.indexedDB;
+  }
+
+  if (factory && !(factory.open as any)[openSymbol]) {
+    const originalOpen = factory.open;
+    factory.open = function (...args: Parameters<typeof originalOpen>) {
+      let version = args[1];
+      if (version) {
+        const existVersion = localStorage.getItem(INDEXED_DB_LOCAL_STORAGE_PREFIX + args[0]);
+        if (existVersion) {
+          version = Math.max(parseInt(existVersion), version);
+        }
+        localStorage.setItem(INDEXED_DB_LOCAL_STORAGE_PREFIX + args[0], version + '');
+      }
+      return originalOpen.call(this, ...args);
+    };
+    (factory.open as any)[openSymbol] = true;
+  }
+  return factory;
 }
