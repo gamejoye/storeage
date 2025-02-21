@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Storeage Supports Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+    }
+    h2 {
+      color: #333;
+    }
+    .support-container {
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .driver-status {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .driver-name {
+      font-weight: bold;
+      margin-right: 15px;
+      min-width: 120px;
+    }
+    .status {
+      padding: 5px 10px;
+      border-radius: 3px;
+      font-size: 14px;
+    }
+    .supported {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .not-supported {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    #error {
+      color: red;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Storage Driver Support Test</h2>
+  
+  <div class="support-container">
+    <h3>Available Drivers:</h3>
+    <div id="driverList">
+      <!-- Driver status will be inserted here -->
+    </div>
+  </div>
+
+  <div class="support-container">
+    <h3>Current Driver:</h3>
+    <div id="currentDriver"></div>
+  </div>
+
+  <div id="error"></div>
+
+  <script type="module" src="./supports.ts"></script>
+</body>
+</html>
