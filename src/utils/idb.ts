@@ -40,3 +40,7 @@ export async function workInVersionChange<T>(
     };
   });
 }
+
+export function getIDB(): IDBFactory | null {
+  return indexedDB;
+}
