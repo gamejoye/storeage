@@ -1,5 +1,11 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  root: './test',
+  test: {
+    environment: 'jsdom',
+    coverage: {
+      include: ['src'],
+    },
+  },
 });

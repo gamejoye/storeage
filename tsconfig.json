@@ -1,5 +1,5 @@
 {
-  "include": ["src", "global.d.ts"],
+  "include": ["src", "global.d.ts", "test"],
   "compilerOptions": {
     "target": "ES2015",
     "module": "esnext",
@@ -12,6 +12,6 @@
     "moduleResolution": "node",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-  },
+    "noEmit": true
+  }
 }
