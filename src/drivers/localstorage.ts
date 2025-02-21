@@ -4,34 +4,46 @@ import { deserialize, serialize } from '../utils';
 class LocalStorageDriver implements IDriver {
   private options: Required<ConfigOptions> = DEFAULT_CONFIG;
   private keyPrefix: string = '';
+  private isDropped = false;
   driverName = 'LocalStorageStorage';
   config(options: ConfigOptions = {}): void {
     this.options = { ...DEFAULT_CONFIG, ...options };
     this.keyPrefix = `${this.options.name}/${this.options.storeName}/`;
   }
 
+  private assertNotDropped(): void {
+    if (this.isDropped) {
+      throw new Error(`LocalStorage: ${this.options.name}/${this.options.storeName} is dropped`);
+    }
+  }
+
   getItem<T>(key: string): Promise<T> {
+    this.assertNotDropped();
     const value = localStorage.getItem(this.internalKeyGenerator(key));
     return Promise.resolve(value !== null ? deserialize(value) : null);
   }
 
   setItem<T>(key: string, value: T): Promise<T> {
+    this.assertNotDropped();
     localStorage.setItem(this.internalKeyGenerator(key), serialize(value));
     return Promise.resolve(value);
   }
 
   removeItem(key: string): Promise<void> {
+    this.assertNotDropped();
     localStorage.removeItem(this.internalKeyGenerator(key));
     return Promise.resolve();
   }
 
   async clear(): Promise<void> {
+    this.assertNotDropped();
     const keys = await this.keys();
     await Promise.all(keys.map(key => this.removeItem(key)));
     return Promise.resolve();
   }
 
   length(): Promise<number> {
+    this.assertNotDropped();
     let count = 0;
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -43,6 +55,7 @@ class LocalStorageDriver implements IDriver {
   }
 
   keys(): Promise<string[]> {
+    this.assertNotDropped();
     const keys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -54,6 +67,7 @@ class LocalStorageDriver implements IDriver {
   }
 
   async iterate<T, U>(callback: (key: string, value: T, index: number) => U): Promise<U | void> {
+    this.assertNotDropped();
     const keys = await this.keys();
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
@@ -66,6 +80,7 @@ class LocalStorageDriver implements IDriver {
   }
 
   async drop(): Promise<void> {
+    this.assertNotDropped();
     const { name, storeName } = this.options;
 
     if (!storeName) {
@@ -89,6 +104,7 @@ class LocalStorageDriver implements IDriver {
       }
     }
     await Promise.all(keysToRemove.map(key => this.removeItem(key)));
+    this.isDropped = true;
   }
 
   supports() {
@@ -104,6 +120,7 @@ class LocalStorageDriver implements IDriver {
   }
 
   ready(): Promise<void> {
+    this.assertNotDropped();
     return Promise.resolve();
   }
 

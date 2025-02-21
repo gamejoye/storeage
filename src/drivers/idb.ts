@@ -6,12 +6,20 @@ const idbDriverMap = new Map<string, IDBDriver[]>();
 class IDBDriver implements IDriver {
   private options: Required<ConfigOptions> = DEFAULT_CONFIG;
   private db!: IDBDatabase;
+  private isDropped = false;
   driverName = 'IndexedDBStorage';
   config(options: ConfigOptions = {}): void {
     this.options = { ...DEFAULT_CONFIG, ...options };
   }
 
+  private assertNotDropped(): void {
+    if (this.isDropped) {
+      throw new Error(`IndexedDB: ${this.options.name}/${this.options.storeName} is dropped`);
+    }
+  }
+
   getItem<T>(key: string): Promise<T> {
+    this.assertNotDropped();
     return new Promise<T>(resolve => {
       this.ready().then(() => {
         const getRequest = this.db
@@ -26,6 +34,7 @@ class IDBDriver implements IDriver {
   }
 
   setItem<T>(key: string, value: T): Promise<T> {
+    this.assertNotDropped();
     return new Promise<T>(resolve => {
       this.ready().then(() => {
         const putRequest = this.db
@@ -40,6 +49,7 @@ class IDBDriver implements IDriver {
   }
 
   removeItem(key: string): Promise<void> {
+    this.assertNotDropped();
     return new Promise<void>(resolve => {
       this.ready().then(() => {
         const deleteRequest = this.db
@@ -54,6 +64,7 @@ class IDBDriver implements IDriver {
   }
 
   clear(): Promise<void> {
+    this.assertNotDropped();
     return new Promise<void>(resolve => {
       this.ready().then(() => {
         const clearRequest = this.db
@@ -68,6 +79,7 @@ class IDBDriver implements IDriver {
   }
 
   length(): Promise<number> {
+    this.assertNotDropped();
     return new Promise<number>(resolve => {
       this.ready().then(() => {
         const lengthRequest = this.db
@@ -82,6 +94,7 @@ class IDBDriver implements IDriver {
   }
 
   keys(): Promise<string[]> {
+    this.assertNotDropped();
     return new Promise<string[]>(resolve => {
       this.ready().then(() => {
         const request = this.db
@@ -96,6 +109,7 @@ class IDBDriver implements IDriver {
   }
 
   iterate<T, U>(callback: (key: string, value: T, index: number) => U): Promise<U | void> {
+    this.assertNotDropped();
     return new Promise<U | void>(resolve => {
       this.keys().then(async keys => {
         for (let i = 0; i < keys.length; i++) {
@@ -146,6 +160,8 @@ class IDBDriver implements IDriver {
           }
         );
       });
+    }).then(() => {
+      this.isDropped = true;
     });
   }
 
@@ -156,11 +172,12 @@ class IDBDriver implements IDriver {
   };
 
   supports() {
-    const idb = getIDB()!;
+    const idb = getIDB();
     return !!idb;
   }
 
   ready: () => Promise<void> = once(() => {
+    this.assertNotDropped();
     const drivers = idbDriverMap.get(this.options.name) || [];
     idbDriverMap.set(this.options.name, [...drivers, this]);
     return new Promise<void>((resolve, reject) => {
