@@ -18,19 +18,23 @@ class Storeage {
   getDriver() {
     for (const driver of this.configDriversSequence) {
       const iDriver = this.driversMap.find(item => item[0] === driver);
-      if (iDriver /** TODO 并且支持该驱动程序 */) {
+      if (iDriver && iDriver[1].supports()) {
         return iDriver[1];
       }
     }
 
     for (const driver of this.defaultDriversSequence) {
       const iDriver = this.driversMap.find(item => item[0] === driver);
-      if (iDriver /** TODO 并且支持该驱动程序 */) {
+      if (iDriver && iDriver[1].supports()) {
         return iDriver[1];
       }
     }
 
     throw new Error('No driver supported');
+  }
+
+  findDriver(driverName: string) {
+    return this.driversMap.find(item => item[0] === driverName)?.[1];
   }
 
   config: IDriver['config'] = (options: ConfigOptions) => {
@@ -198,6 +202,12 @@ class Storeage {
 
     console.warn('dropInstance config error', config);
     return Promise.reject(new Error('dropInstance config error'));
+  }
+
+  supports(driverName: string) {
+    const driver = this.findDriver(driverName);
+    if (!driver) return false;
+    return driver.supports();
   }
 
   driver = () => {

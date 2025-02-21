@@ -91,6 +91,18 @@ class LocalStorageDriver implements IDriver {
     await Promise.all(keysToRemove.map(key => this.removeItem(key)));
   }
 
+  supports() {
+    if (!('localStorage' in window)) return false;
+    try {
+      const LOCAL_STORAGE_TEST_KEY = '__storeage_localstorage_test_key__';
+      localStorage.setItem(LOCAL_STORAGE_TEST_KEY, 'test');
+      localStorage.removeItem(LOCAL_STORAGE_TEST_KEY);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   ready(): Promise<void> {
     return Promise.resolve();
   }

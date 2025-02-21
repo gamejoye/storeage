@@ -1,5 +1,5 @@
 import { DEFAULT_CONFIG, IDB_MODE } from '../constants';
-import { once, workInVersionChange } from '../utils';
+import { getIDB, once, workInVersionChange } from '../utils';
 
 const idbDriverMap = new Map<string, IDBDriver[]>();
 
@@ -120,7 +120,7 @@ class IDBDriver implements IDriver {
         if (!storeName) {
           // TODO
           // 删除数据库
-          const request = indexedDB.deleteDatabase(name);
+          const request = getIDB()!.deleteDatabase(name);
           request.onerror = () => {
             reject(new Error('drop database error'));
           };
@@ -155,11 +155,16 @@ class IDBDriver implements IDriver {
     }
   };
 
+  supports() {
+    const idb = getIDB()!;
+    return !!idb;
+  }
+
   ready: () => Promise<void> = once(() => {
     const drivers = idbDriverMap.get(this.options.name) || [];
     idbDriverMap.set(this.options.name, [...drivers, this]);
     return new Promise<void>((resolve, reject) => {
-      const request = indexedDB.open(this.options.name);
+      const request = getIDB()!.open(this.options.name);
       /**
        * 执行顺序
        * onupgradeneeded（如果有新的版本号或者新建数据库）
@@ -200,7 +205,7 @@ class IDBDriver implements IDriver {
 
   private reconnect(): Promise<void> {
     return new Promise<void>(resolve => {
-      const request = indexedDB.open(this.options.name);
+      const request = getIDB()!.open(this.options.name);
       request.onsuccess = () => {
         this.db = request.result;
         this.db.onversionchange = this.close;

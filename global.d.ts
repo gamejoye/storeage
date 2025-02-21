@@ -33,5 +33,7 @@ interface IDriver {
 
   drop: () => Promise<void>;
 
+  supports: () => boolean;
+
   ready: () => Promise<void>;
 }
