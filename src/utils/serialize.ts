@@ -24,6 +24,7 @@ import {
   UINT16_ARRAY_PREFIX,
   UINT32_ARRAY_PREFIX,
 } from '../constants';
+import { UnsupportedTypeError } from '../errors';
 
 const prefixMap = {
   '[object Float32Array]': FLOAT32_ARRAY_PREFIX,
@@ -52,7 +53,11 @@ export function serialize(value: any): string {
   if (prefix) {
     return prefix + JSON.stringify(Array.from(value));
   }
-  return JSON.stringify(value);
+  try {
+    return JSON.stringify(value);
+  } catch (e) {
+    throw new UnsupportedTypeError('Failed to serialize value: ' + e);
+  }
 }
 
 function bufferToString(buffer: ArrayBuffer): string {

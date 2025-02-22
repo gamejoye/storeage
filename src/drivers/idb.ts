@@ -1,4 +1,5 @@
 import { DEFAULT_CONFIG, IDB_MODE } from '../constants';
+import { DroppedError } from '../errors';
 import { getIDB, once, workInVersionChange } from '../utils';
 
 const idbDriverMap = new Map<string, IDBDriver[]>();
@@ -14,7 +15,9 @@ class IDBDriver implements IDriver {
 
   private assertNotDropped(): void {
     if (this.isDropped) {
-      throw new Error(`IndexedDB: ${this.options.name}/${this.options.storeName} is dropped`);
+      throw new DroppedError(
+        `IndexedDB: ${this.options.name}/${this.options.storeName} is dropped`
+      );
     }
   }
 

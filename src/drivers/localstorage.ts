@@ -1,4 +1,5 @@
 import { DEFAULT_CONFIG } from '../constants';
+import { DroppedError } from '../errors';
 import { deserialize, serialize } from '../utils';
 
 class LocalStorageDriver implements IDriver {
@@ -13,7 +14,9 @@ class LocalStorageDriver implements IDriver {
 
   private assertNotDropped(): void {
     if (this.isDropped) {
-      throw new Error(`LocalStorage: ${this.options.name}/${this.options.storeName} is dropped`);
+      throw new DroppedError(
+        `LocalStorage: ${this.options.name}/${this.options.storeName} is dropped`
+      );
     }
   }
 

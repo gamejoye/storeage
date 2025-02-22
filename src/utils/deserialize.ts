@@ -10,6 +10,7 @@ import {
   UINT16_ARRAY_PREFIX,
   UINT32_ARRAY_PREFIX,
 } from '../constants';
+import { InternalError } from '../errors';
 
 const prefixMap = {
   [ARRAY_BUFFER_PREFIX]: (str: string) => decodeStringToBuffer(str),
@@ -34,8 +35,7 @@ export function deserialize(valueString: string): any {
         return handler(valueString.substring(prefix.length));
       }
     }
-    console.warn('Storage internal error: Failed to deserialize value', valueString);
-    return '';
+    throw new InternalError('Failed to deserialize value: ' + valueString);
   }
 }
 

@@ -1,6 +1,7 @@
 import IDBDriver from './drivers/idb';
 import LocalStorageDriver from './drivers/localstorage';
 import { DEFAULT_CONFIG, INTERNAL_DRIVERS } from './constants';
+import { ConfigError, UnsupportedError } from './errors';
 
 class Storeage {
   private driversMap: [string, IDriver][];
@@ -30,7 +31,7 @@ class Storeage {
       }
     }
 
-    throw new Error('No driver supported');
+    throw new UnsupportedError('No driver supported');
   }
 
   findDriver(driverName: string) {
@@ -199,9 +200,7 @@ class Storeage {
       // TODO
       // 删除整个name下的所有storeName
     }
-
-    console.warn('dropInstance config error', config);
-    return Promise.reject(new Error('dropInstance config error'));
+    return Promise.reject(new ConfigError('dropInstance config error: config.name is required'));
   }
 
   supports(driverName: string) {
