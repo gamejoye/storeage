@@ -4,38 +4,43 @@ import { DEFAULT_CONFIG, INTERNAL_DRIVERS } from './constants';
 import { ConfigError, UnsupportedError } from './errors';
 
 class Storeage {
-  private driversMap: [string, IDriver][];
+  private driversMap: Map<string, IDriver> = new Map();
   private defaultDriversSequence = [INTERNAL_DRIVERS.IDB, INTERNAL_DRIVERS.LOCALSTORAGE];
   private configDriversSequence: string[] = [];
   private driverName: string | null = null;
 
   constructor() {
-    this.driversMap = [
-      [INTERNAL_DRIVERS.IDB, new IDBDriver()],
-      [INTERNAL_DRIVERS.LOCALSTORAGE, new LocalStorageDriver()],
-    ];
+    this.driversMap.set(INTERNAL_DRIVERS.IDB, new IDBDriver());
+    this.driversMap.set(INTERNAL_DRIVERS.LOCALSTORAGE, new LocalStorageDriver());
   }
 
-  getDriver() {
+  private getDriver() {
     for (const driver of this.configDriversSequence) {
-      const iDriver = this.driversMap.find(item => item[0] === driver);
-      if (iDriver && iDriver[1].supports()) {
-        return iDriver[1];
+      const iDriver = this.driversMap.get(driver);
+      if (iDriver && iDriver.supports()) {
+        return iDriver;
       }
     }
 
     for (const driver of this.defaultDriversSequence) {
-      const iDriver = this.driversMap.find(item => item[0] === driver);
-      if (iDriver && iDriver[1].supports()) {
-        return iDriver[1];
+      const iDriver = this.driversMap.get(driver);
+      if (iDriver && iDriver.supports()) {
+        return iDriver;
       }
     }
 
     throw new UnsupportedError('No driver supported');
   }
 
-  findDriver(driverName: string) {
-    return this.driversMap.find(item => item[0] === driverName)?.[1];
+  private findDriver(driverName: string) {
+    return this.driversMap.get(driverName);
+  }
+
+  defineDriver(driverName: string, driver: IDriver) {
+    if (this.driversMap.has(driverName)) {
+      throw new ConfigError(`Driver ${driverName} already defined`);
+    }
+    this.driversMap.set(driverName, driver);
   }
 
   config: IDriver['config'] = (options: ConfigOptions) => {
