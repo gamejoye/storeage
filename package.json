@@ -1,19 +1,18 @@
 {
   "name": "storeage",
   "version": "0.0.0",
-  "description": "Universal storage library with multi-driver support",
+  "description": "A modern async storage library inspired by localForage, with a similar API",
   "main": "dist/storeage.esm.js",
   "module": "dist/storeage.esm.js",
   "browser": "dist/storeage.umd.js",
   "types": "dist/index.d.ts",
-  "scripts": {
-    "preinstall": "npx only-allow pnpm",
-    "prepare": "husky",
-    "lint-fix": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix --ignore-pattern \"dist\"",
-    "dev": "vite",
-    "test": "vitest",
-    "coverage": "vitest run --coverage",
-    "build": "rollup -c --bundleConfigAsCjs"
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gamejoye/storeage.git"
   },
   "files": [
     "dist"
@@ -27,6 +26,17 @@
     "offline storage",
     "browser storage"
   ],
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "prepare": "husky",
+    "lint-fix": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix --ignore-pattern \"dist\"",
+    "dev": "vite",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "coverage": "vitest run --coverage",
+    "build": "rollup -c --bundleConfigAsCjs"
+  },
   "devDependencies": {
     "@commitlint/cli": "^19.6.0",
     "@commitlint/config-conventional": "^19.6.0",
