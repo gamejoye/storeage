@@ -1,5 +1,6 @@
 import { DEFAULT_CONFIG, IDB_MODE } from '../constants';
 import { DroppedError } from '../errors';
+import { ConfigOptions, IDriver } from '../interface';
 import { getIDB, once, workInVersionChange } from '../utils';
 
 const idbDriverMap = new Map<string, IDBDriver[]>();

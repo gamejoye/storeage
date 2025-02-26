@@ -1,3 +1,5 @@
+import { ConfigOptions } from './interface';
+
 export const DEFAULT_CONFIG: Required<ConfigOptions> = {
   driver: ['localstorage', 'idb'],
   name: 'storeage',

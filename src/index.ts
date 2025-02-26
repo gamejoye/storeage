@@ -2,6 +2,7 @@ import IDBDriver from './drivers/idb';
 import LocalStorageDriver from './drivers/localstorage';
 import { DEFAULT_CONFIG, INTERNAL_DRIVERS } from './constants';
 import { ConfigError, UnsupportedError } from './errors';
+import { ConfigOptions, DropInstanceOptions, IDriver } from './interface';
 
 class Storeage {
   private driversMap: Map<string, IDriver> = new Map();
@@ -222,3 +223,5 @@ class Storeage {
 const storeage = new Storeage();
 
 export default storeage;
+
+export type { ConfigOptions, DropInstanceOptions, IDriver } from './interface';

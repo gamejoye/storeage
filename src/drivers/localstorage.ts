@@ -1,5 +1,6 @@
 import { DEFAULT_CONFIG } from '../constants';
 import { DroppedError } from '../errors';
+import { ConfigOptions, IDriver } from '../interface';
 import { deserialize, serialize } from '../utils';
 
 class LocalStorageDriver implements IDriver {
