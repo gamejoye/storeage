@@ -124,6 +124,7 @@ class LocalStorageDriver implements IDriver {
   }
 
   ready(): Promise<void> {
+    this.config();
     this.assertNotDropped();
     return Promise.resolve();
   }

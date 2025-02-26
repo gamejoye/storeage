@@ -181,6 +181,7 @@ class IDBDriver implements IDriver {
   }
 
   ready: () => Promise<void> = once(() => {
+    this.config();
     this.assertNotDropped();
     const drivers = idbDriverMap.get(this.options.name) || [];
     idbDriverMap.set(this.options.name, [...drivers, this]);
