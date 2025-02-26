@@ -1,6 +1,6 @@
 import IDBDriver from './drivers/idb';
 import LocalStorageDriver from './drivers/localstorage';
-import { DEFAULT_CONFIG, INTERNAL_DRIVERS } from './constants';
+import { INTERNAL_DRIVERS } from './constants';
 import { ConfigError, UnsupportedError } from './errors';
 import { ConfigOptions, DropInstanceOptions, IDriver } from './interface';
 
@@ -182,7 +182,6 @@ class Storeage {
   }
 
   createInstance(config: ConfigOptions = {}): Storeage {
-    config = { ...DEFAULT_CONFIG, ...config };
     const instance = new Storeage();
     instance.config(config);
     return instance;
