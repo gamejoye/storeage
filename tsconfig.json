@@ -12,6 +12,8 @@
     "moduleResolution": "node",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true
+    "declarationDir": "dist",
+    "outDir": "dist",
+    "importHelpers": true
   }
 }
