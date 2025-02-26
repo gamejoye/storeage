@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { describe, expect, it } from 'vitest';
-import storeage from '../../src';
+import storeage, { ConfigOptions } from '../../src';
 import { INTERNAL_DRIVERS } from '../../src/constants';
 import { ConfigError } from '../../src/errors';
 
