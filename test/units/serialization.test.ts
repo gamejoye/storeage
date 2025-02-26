@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { deserialize, serialize } from '../../src/utils';
+import { UnsupportedTypeError } from '../../src/errors';
 
 describe('serialize and deserialize', () => {
   it('should be able to serialize and deserialize underlying type', () => {
@@ -88,6 +89,12 @@ describe('serialize and deserialize', () => {
     // TODO: Implement
     const blob = new Blob(['Hello, world!'], { type: 'text/plain' });
     expect(serialize(blob)).toBe('');
+  });
+
+  it('should be able to throw UnsupportedTypeError when serialize unsupported type', () => {
+    expect(() => serialize(Symbol('test'))).toThrowError(UnsupportedTypeError);
+    expect(() => serialize(() => {})).toThrowError(UnsupportedTypeError);
+    expect(() => serialize(124124124124n)).toThrowError(UnsupportedTypeError);
   });
 
   it('should be able to work correctly without TextDecoder', () => {

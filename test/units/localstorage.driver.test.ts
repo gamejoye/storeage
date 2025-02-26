@@ -1,47 +1,15 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import storeage from '../../src';
-import { INTERNAL_DRIVERS } from '../../src/constants';
+import LocalStorageDriver from '../../src/drivers/localstorage';
+import { DroppedError } from '../../src/errors';
 
 describe('localstorage driver', () => {
   beforeEach(() => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.LOCALSTORAGE],
-    });
+    const instance = new LocalStorageDriver();
     return instance.clear();
   });
 
-  it('should return false when not supported', async () => {
-    const localStorage = globalThis.localStorage;
-    // @ts-expect-error - localStorage is optional in window
-    delete globalThis.localStorage;
-    expect(storeage.supports(INTERNAL_DRIVERS.LOCALSTORAGE)).toBe(false);
-    globalThis.localStorage = localStorage;
-  });
-
-  it('should be supported', async () => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.LOCALSTORAGE],
-    });
-    await instance.ready();
-    expect(instance.supports(INTERNAL_DRIVERS.LOCALSTORAGE)).toBe(true);
-  });
-
-  it('should be able to get driver name', async () => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.LOCALSTORAGE],
-    });
-    const unreadyDriverName = instance.driver();
-    expect(unreadyDriverName).toBeNull();
-    await instance.ready();
-    const driverName = instance.driver();
-    expect(driverName).not.toBeNull();
-    expect(driverName!.toLowerCase()).toMatch(/.*localstorage.*$/);
-  });
-
   it('should be able to get item and set item', async () => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.LOCALSTORAGE],
-    });
+    const instance = new LocalStorageDriver();
     await instance.ready();
     await instance.setItem('test', 'test');
     const value = await instance.getItem('test');
@@ -49,9 +17,7 @@ describe('localstorage driver', () => {
   });
 
   it('should be able to remove item', async () => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.LOCALSTORAGE],
-    });
+    const instance = new LocalStorageDriver();
     await instance.ready();
     await instance.setItem('test', 'test');
     await instance.removeItem('test');
@@ -60,9 +26,7 @@ describe('localstorage driver', () => {
   });
 
   it('should be able to clear all items', async () => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.LOCALSTORAGE],
-    });
+    const instance = new LocalStorageDriver();
     await instance.ready();
     await instance.setItem('test', 'test');
     await instance.setItem('test2', 'test2');
@@ -74,9 +38,7 @@ describe('localstorage driver', () => {
   });
 
   it('should be able to get length', async () => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.LOCALSTORAGE],
-    });
+    const instance = new LocalStorageDriver();
     await instance.ready();
     await instance.setItem('test', 'test');
     await instance.setItem('test2', 'test2');
@@ -85,9 +47,7 @@ describe('localstorage driver', () => {
   });
 
   it('should be able to get keys', async () => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.LOCALSTORAGE],
-    });
+    const instance = new LocalStorageDriver();
     await instance.ready();
     await instance.setItem('test', 'test');
     await instance.setItem('test2', 'test2');
@@ -97,9 +57,7 @@ describe('localstorage driver', () => {
   });
 
   it('should be able to iterate', async () => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.LOCALSTORAGE],
-    });
+    const instance = new LocalStorageDriver();
     await instance.ready();
     await instance.setItem('test', 'test');
     await instance.setItem('test2', 'test2');
@@ -120,11 +78,14 @@ describe('localstorage driver', () => {
   });
 
   it('should be able to drop', async () => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.LOCALSTORAGE],
-    });
+    const instance = new LocalStorageDriver();
     await instance.ready();
-    await instance.dropInstance();
-    await expect(() => instance.getItem('test')).rejects.toThrowError();
+    await instance.setItem('test', 'test');
+    await instance.drop();
+    expect(() => instance.getItem('test')).toThrowError(DroppedError);
+
+    const sameInstance = new LocalStorageDriver();
+    const value = await sameInstance.ready().then(() => sameInstance.getItem('test'));
+    expect(value).toBeNull();
   });
 });

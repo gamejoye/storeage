@@ -1,45 +1,16 @@
 import 'fake-indexeddb/auto';
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import storeage from '../../src';
-import { INTERNAL_DRIVERS } from '../../src/constants';
+import IDBDriver from '../../src/drivers/idb';
 
 describe('idb driver', () => {
   beforeEach(() => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.IDB],
-    });
+    const instance = new IDBDriver();
     return instance.clear();
   });
 
-  it('should return false when not supported', async () => {
-    const indexedDB = globalThis.indexedDB;
-    // @ts-expect-error - indexedDB is optional in window
-    delete globalThis.indexedDB;
-    expect(storeage.supports(INTERNAL_DRIVERS.IDB)).toBe(false);
-    globalThis.indexedDB = indexedDB;
-  });
-
-  it('should be supported', async () => {
-    expect(storeage.supports(INTERNAL_DRIVERS.IDB)).toBe(true);
-  });
-
-  it('should be able to get driver name', async () => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.IDB],
-    });
-    const unreadyDriverName = instance.driver();
-    expect(unreadyDriverName).toBeNull();
-    await instance.ready();
-    const driverName = instance.driver();
-    expect(driverName).not.toBeNull();
-    expect(driverName!.toLowerCase()).toMatch(/.*indexeddb.*$/);
-  });
-
   it('should be able to get item and set item', async () => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.IDB],
-    });
+    const instance = new IDBDriver();
     await instance.ready();
     await instance.setItem('test', 'test');
     const value = await instance.getItem('test');
@@ -47,9 +18,7 @@ describe('idb driver', () => {
   });
 
   it('should be able to remove item', async () => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.IDB],
-    });
+    const instance = new IDBDriver();
     await instance.ready();
     await instance.setItem('test', 'test');
     await instance.removeItem('test');
@@ -58,9 +27,7 @@ describe('idb driver', () => {
   });
 
   it('should be able to clear all items', async () => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.IDB],
-    });
+    const instance = new IDBDriver();
     await instance.ready();
     await instance.setItem('test', 'test');
     await instance.setItem('test2', 'test2');
@@ -72,9 +39,7 @@ describe('idb driver', () => {
   });
 
   it('should be able to get length', async () => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.IDB],
-    });
+    const instance = new IDBDriver();
     await instance.ready();
     await instance.setItem('test', 'test');
     await instance.setItem('test2', 'test2');
@@ -83,9 +48,7 @@ describe('idb driver', () => {
   });
 
   it('should be able to get keys', async () => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.IDB],
-    });
+    const instance = new IDBDriver();
     await instance.ready();
     await instance.setItem('test', 'test');
     await instance.setItem('test2', 'test2');
@@ -95,9 +58,7 @@ describe('idb driver', () => {
   });
 
   it('should be able to iterate', async () => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.IDB],
-    });
+    const instance = new IDBDriver();
     await instance.ready();
     await instance.setItem('test', 'test');
     await instance.setItem('test2', 'test2');
@@ -119,11 +80,16 @@ describe('idb driver', () => {
   });
 
   it('should be able to drop', async () => {
-    const instance = storeage.createInstance({
-      driver: [INTERNAL_DRIVERS.IDB],
-    });
+    const instance = new IDBDriver();
     await instance.ready();
-    await instance.dropInstance();
-    await expect(() => instance.getItem('test')).rejects.toThrowError();
+    await instance.drop();
+    expect(() => instance.getItem('test')).toThrowError();
+  });
+
+  it('should be able to drop', async () => {
+    const instance = new IDBDriver();
+    await instance.ready();
+    await instance.drop();
+    expect(() => instance.getItem('test')).toThrowError();
   });
 });
