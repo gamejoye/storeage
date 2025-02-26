@@ -51,12 +51,26 @@ export function serialize(value: any): string {
     prefix = prefixMap[type as keyof typeof prefixMap] ?? '';
   }
   if (prefix) {
-    return prefix + JSON.stringify(Array.from(value));
+    try {
+      const s = JSON.stringify(Array.from(value));
+      validateString(s);
+      return prefix + s;
+    } catch (e) {
+      throw new UnsupportedTypeError('Failed to serialize value: ' + e);
+    }
   }
   try {
-    return JSON.stringify(value);
+    const s = JSON.stringify(value);
+    validateString(s);
+    return s;
   } catch (e) {
     throw new UnsupportedTypeError('Failed to serialize value: ' + e);
+  }
+}
+
+function validateString(s: any) {
+  if (typeof s !== 'string') {
+    throw new Error('');
   }
 }
 
