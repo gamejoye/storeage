@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { describe, it, expect } from 'vitest';
-import storeage, { ConfigOptions, IDriver } from '../../src';
+import storeage, { ConfigOptions, IDriver } from '../../../src';
 
 describe('config api', () => {
   it('should be able to config', async () => {

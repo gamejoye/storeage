@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { deserialize, serialize } from '../../src/utils';
-import { UnsupportedTypeError } from '../../src/errors';
+import { deserialize, serialize } from '../../../src/utils';
+import { UnsupportedTypeError } from '../../../src/errors';
 
 describe('serialize and deserialize', () => {
   it('should be able to serialize and deserialize underlying type', () => {

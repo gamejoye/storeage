@@ -1,27 +1,24 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import storeage from '../../src';
+import storeage from '../../../src';
 
-describe('clear api', () => {
+describe('removeItem api', () => {
   beforeEach(() => {
     const instance = storeage.createInstance();
     return instance.clear();
   });
 
-  it('clear with promise style', async () => {
+  it('removeItem with promise style', async () => {
     const instance = storeage.createInstance();
     await instance.setItem('test', 'test');
-    await instance.setItem('test2', 'test2');
-    await instance.clear();
+    await instance.removeItem('test');
     const value = await instance.getItem('test');
     expect(value).toBeNull();
-    const value2 = await instance.getItem('test2');
-    expect(value2).toBeNull();
   });
 
-  it('clear with callback style', async () => {
+  it('removeItem with callback style', async () => {
     const instance = storeage.createInstance();
     await instance.setItem('test', 'test');
-    instance.clear(() => {
+    instance.removeItem('test', () => {
       instance.getItem('test', value => {
         expect(value).toBeNull();
       });

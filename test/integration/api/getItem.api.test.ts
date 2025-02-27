@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import storeage from '../../src';
+import storeage from '../../../src';
 
 describe('getItem api', () => {
   beforeEach(() => {

@@ -1,11 +1,11 @@
 import 'fake-indexeddb/auto';
 
 import { describe, it, expect } from 'vitest';
-import { INTERNAL_DRIVERS } from '../../src/constants';
-import storeage from '../../src';
-import { UnsupportedError } from '../../src/errors';
-import LocalStorageDriver from '../../src/drivers/localstorage';
-import IDBDriver from '../../src/drivers/idb';
+import { INTERNAL_DRIVERS } from '../../../src/constants';
+import storeage from '../../../src';
+import { UnsupportedError } from '../../../src/errors';
+import LocalStorageDriver from '../../../src/drivers/localstorage';
+import IDBDriver from '../../../src/drivers/idb';
 
 describe('drivers supports', () => {
   it('should throw error when no drivers supported', () => {

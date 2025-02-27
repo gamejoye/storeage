@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { describe, expect, it } from 'vitest';
-import storeage, { ConfigOptions } from '../../src';
-import { INTERNAL_DRIVERS } from '../../src/constants';
-import { ConfigError } from '../../src/errors';
+import storeage, { ConfigOptions } from '../../../src';
+import { INTERNAL_DRIVERS } from '../../../src/constants';
+import { ConfigError } from '../../../src/errors';
 
 describe('defineDriver', () => {
   it('should define a driver', () => {

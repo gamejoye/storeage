@@ -1,11 +1,13 @@
-import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
-import LocalStorageDriver from '../../src/drivers/localstorage';
-import { DroppedError } from '../../src/errors';
+import 'fake-indexeddb/auto';
 
-describe('localstorage driver', () => {
+import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
+import IDBDriver from '../../../src/drivers/idb';
+import { DroppedError } from '../../../src/errors';
+
+describe('idb driver', () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ['Date'] });
-    const instance = new LocalStorageDriver();
+    const instance = new IDBDriver();
     return instance.clear();
   });
 
@@ -14,7 +16,7 @@ describe('localstorage driver', () => {
   });
 
   it('should be able to get item and set item', async () => {
-    const instance = new LocalStorageDriver();
+    const instance = new IDBDriver();
     await instance.ready();
     await instance.setItem('test', 'test');
     const value = await instance.getItem('test');
@@ -22,7 +24,7 @@ describe('localstorage driver', () => {
   });
 
   it('should be able to remove item', async () => {
-    const instance = new LocalStorageDriver();
+    const instance = new IDBDriver();
     await instance.ready();
     await instance.setItem('test', 'test');
     await instance.removeItem('test');
@@ -31,7 +33,7 @@ describe('localstorage driver', () => {
   });
 
   it('should be able to clear all items', async () => {
-    const instance = new LocalStorageDriver();
+    const instance = new IDBDriver();
     await instance.ready();
     await instance.setItem('test', 'test');
     await instance.setItem('test2', 'test2');
@@ -43,7 +45,7 @@ describe('localstorage driver', () => {
   });
 
   it('should be able to get length', async () => {
-    const instance = new LocalStorageDriver();
+    const instance = new IDBDriver();
     await instance.ready();
     await instance.setItem('test', 'test');
     await instance.setItem('test2', 'test2');
@@ -52,7 +54,7 @@ describe('localstorage driver', () => {
   });
 
   it('should be able to get keys', async () => {
-    const instance = new LocalStorageDriver();
+    const instance = new IDBDriver();
     await instance.ready();
     await instance.setItem('test', 'test');
     await instance.setItem('test2', 'test2');
@@ -62,7 +64,7 @@ describe('localstorage driver', () => {
   });
 
   it('should be able to iterate', async () => {
-    const instance = new LocalStorageDriver();
+    const instance = new IDBDriver();
     await instance.ready();
     await instance.setItem('test', 'test');
     await instance.setItem('test2', 'test2');
@@ -73,6 +75,7 @@ describe('localstorage driver', () => {
     expect(result).toContainEqual({ key: 'test', value: 'test' });
     expect(result).toContainEqual({ key: 'test2', value: 'test2' });
 
+    // 提前结束迭代
     const items: { key: string; value: string }[] = [];
     const item = await instance.iterate<string, any>((key, value) => {
       items.push({ key, value });
@@ -83,19 +86,14 @@ describe('localstorage driver', () => {
   });
 
   it('should be able to drop', async () => {
-    const instance = new LocalStorageDriver();
+    const instance = new IDBDriver();
     await instance.ready();
-    await instance.setItem('test', 'test');
     await instance.drop();
     await expect(() => instance.getItem('test')).rejects.toThrowError(DroppedError);
-
-    const sameInstance = new LocalStorageDriver();
-    const value = await sameInstance.ready().then(() => sameInstance.getItem('test'));
-    expect(value).toBeNull();
   });
 
   it('should be able to set item with expiration', async () => {
-    const instance = new LocalStorageDriver();
+    const instance = new IDBDriver();
     await instance.ready();
     await instance.setItem('test', 'test', 1000);
     const now = new Date().getTime();

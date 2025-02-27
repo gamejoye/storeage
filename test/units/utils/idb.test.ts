@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto';
 
 import { describe, expect, it, vi } from 'vitest';
-import { getIDB, getIDBVersion, workInVersionChange } from '../../src/utils/idb';
+import { getIDB, getIDBVersion, workInVersionChange } from '../../../src/utils/idb';
 
 describe.sequential('getIDBVersion', () => {
   it('should return indexedDB', () => {
