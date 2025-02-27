@@ -15,9 +15,9 @@ export interface IDriver {
 
   config: (options: ConfigOptions) => void;
 
-  getItem: <T>(key: string) => Promise<T>;
+  getItem: <T>(key: string) => Promise<T | null>;
 
-  setItem: <T>(key: string, value: T) => Promise<T>;
+  setItem: <T>(key: string, value: T, expiration?: number) => Promise<T>;
 
   removeItem: (key: string) => Promise<void>;
 

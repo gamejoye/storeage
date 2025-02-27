@@ -2,6 +2,7 @@ import { DEFAULT_CONFIG, IDB_MODE } from '../constants';
 import { DroppedError } from '../errors';
 import { ConfigOptions, IDriver } from '../interface';
 import { getIDB, once, workInVersionChange } from '../utils';
+import { ExpirationItem, ExpirationItemJSON } from '../value-objects/expiration-item';
 
 const idbDriverMap = new Map<string, IDBDriver[]>();
 
@@ -11,7 +12,7 @@ class IDBDriver implements IDriver {
   private isDropped = false;
   driverName = 'IndexedDBStorage';
   config(options: ConfigOptions = {}): void {
-    this.options = { ...DEFAULT_CONFIG, ...options };
+    this.options = { ...this.options, ...options };
   }
 
   private assertNotDropped(): void {
@@ -22,31 +23,36 @@ class IDBDriver implements IDriver {
     }
   }
 
-  getItem<T>(key: string): Promise<T> {
+  async getItem<T>(key: string): Promise<T | null> {
     this.assertNotDropped();
-    return new Promise<T>(resolve => {
-      this.ready().then(() => {
-        const getRequest = this.db
-          .transaction(this.options.storeName, IDB_MODE.READ_ONLY)
-          .objectStore(this.options.storeName)
-          .get(key);
-        getRequest.onsuccess = () => {
-          resolve(getRequest.result === undefined ? null : getRequest.result);
-        };
-      });
+    await this.ready();
+    return new Promise<T | null>(resolve => {
+      const getRequest = this.db
+        .transaction(this.options.storeName, IDB_MODE.READ_ONLY)
+        .objectStore(this.options.storeName)
+        .get(key);
+      getRequest.onsuccess = () => {
+        const item = getRequest.result as ExpirationItemJSON<T>;
+        if (!item) {
+          resolve(null);
+          return;
+        }
+        resolve(ExpirationItem.fromJSON(item).value);
+      };
     });
   }
 
-  setItem<T>(key: string, value: T): Promise<T> {
+  setItem<T>(key: string, value: T, expiration?: number): Promise<T> {
     this.assertNotDropped();
+    const item = new ExpirationItem<T>(value, expiration);
     return new Promise<T>(resolve => {
       this.ready().then(() => {
         const putRequest = this.db
           .transaction(this.options.storeName, IDB_MODE.READ_WRITE)
           .objectStore(this.options.storeName)
-          .put(value, key);
+          .put(item.toJSON(), key);
         putRequest.onsuccess = () => {
-          resolve(value);
+          resolve(item.value!);
         };
       });
     });
@@ -86,12 +92,15 @@ class IDBDriver implements IDriver {
     this.assertNotDropped();
     return new Promise<number>(resolve => {
       this.ready().then(() => {
-        const lengthRequest = this.db
+        const request = this.db
           .transaction(this.options.storeName, IDB_MODE.READ_ONLY)
           .objectStore(this.options.storeName)
-          .count();
-        lengthRequest.onsuccess = () => {
-          resolve(lengthRequest.result);
+          .getAll();
+        request.onsuccess = () => {
+          const items = (request.result as ExpirationItemJSON<any>[]).filter(
+            item => !ExpirationItem.fromJSON(item).isExpired()
+          );
+          resolve(items.length);
         };
       });
     });
@@ -104,9 +113,19 @@ class IDBDriver implements IDriver {
         const request = this.db
           .transaction(this.options.storeName, IDB_MODE.READ_ONLY)
           .objectStore(this.options.storeName)
-          .getAllKeys();
-        request.onsuccess = () => {
-          resolve(request.result.map(key => key + ''));
+          .openCursor();
+        const keys: string[] = [];
+        request.onsuccess = e => {
+          const cursor = (e.target as any).result as IDBCursorWithValue;
+          if (!cursor) {
+            resolve(keys);
+            return;
+          }
+          const item = ExpirationItem.fromJSON(cursor.value as ExpirationItemJSON<any>);
+          if (!item.isExpired()) {
+            keys.push(cursor.key as string);
+          }
+          cursor.continue();
         };
       });
     });
@@ -119,6 +138,7 @@ class IDBDriver implements IDriver {
         for (let i = 0; i < keys.length; i++) {
           const key = keys[i];
           const value = await this.getItem<T>(key);
+          if (value === null) continue;
           const result = callback(key, value, i);
           if (result !== undefined) {
             resolve(result);

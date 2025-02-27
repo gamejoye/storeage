@@ -1,7 +1,8 @@
 import { DEFAULT_CONFIG } from '../constants';
 import { DroppedError } from '../errors';
 import { ConfigOptions, IDriver } from '../interface';
-import { deserialize, serialize } from '../utils';
+import { once } from '../utils';
+import { ExpirationItem } from '../value-objects/expiration-item';
 
 class LocalStorageDriver implements IDriver {
   private options: Required<ConfigOptions> = DEFAULT_CONFIG;
@@ -9,7 +10,7 @@ class LocalStorageDriver implements IDriver {
   private isDropped = false;
   driverName = 'LocalStorageStorage';
   config(options: ConfigOptions = {}): void {
-    this.options = { ...DEFAULT_CONFIG, ...options };
+    this.options = { ...this.options, ...options };
     this.keyPrefix = `${this.options.name}/${this.options.storeName}/`;
   }
 
@@ -21,15 +22,22 @@ class LocalStorageDriver implements IDriver {
     }
   }
 
-  getItem<T>(key: string): Promise<T> {
+  async getItem<T>(key: string): Promise<T | null> {
     this.assertNotDropped();
     const value = localStorage.getItem(this.internalKeyGenerator(key));
-    return Promise.resolve(value !== null ? deserialize(value) : null);
+    if (value === null) return null;
+    const expirationItem = ExpirationItem.fromString<T>(value);
+    if (expirationItem.isExpired()) {
+      await this.removeItem(key);
+      return null;
+    }
+    return expirationItem.value;
   }
 
-  setItem<T>(key: string, value: T): Promise<T> {
+  setItem<T>(key: string, value: T, expiration?: number): Promise<T> {
     this.assertNotDropped();
-    localStorage.setItem(this.internalKeyGenerator(key), serialize(value));
+    const item = new ExpirationItem(value, expiration);
+    localStorage.setItem(this.internalKeyGenerator(key), item.toString());
     return Promise.resolve(value);
   }
 
@@ -46,13 +54,16 @@ class LocalStorageDriver implements IDriver {
     return Promise.resolve();
   }
 
-  length(): Promise<number> {
+  async length(): Promise<number> {
     this.assertNotDropped();
     let count = 0;
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && this.isBelongsToStore(key, this.options.name, this.options.storeName)) {
-        count++;
+        const value = localStorage.getItem(key);
+        if (value !== null && !ExpirationItem.fromString(value).isExpired()) {
+          count++;
+        }
       }
     }
     return Promise.resolve(count);
@@ -64,7 +75,10 @@ class LocalStorageDriver implements IDriver {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && this.isBelongsToStore(key, this.options.name, this.options.storeName)) {
-        keys.push(this.decodeInternalKey(key));
+        const value = localStorage.getItem(key);
+        if (value !== null && !ExpirationItem.fromString(value).isExpired()) {
+          keys.push(this.decodeInternalKey(key));
+        }
       }
     }
     return Promise.resolve(keys);
@@ -76,6 +90,8 @@ class LocalStorageDriver implements IDriver {
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       const value = await this.getItem<T>(key);
+      if (value === null) continue;
+
       const result = callback(key, value, i);
       if (result !== undefined) {
         return result;
@@ -123,11 +139,11 @@ class LocalStorageDriver implements IDriver {
     }
   }
 
-  ready(): Promise<void> {
+  ready: () => Promise<void> = once(() => {
     this.config();
     this.assertNotDropped();
     return Promise.resolve();
-  }
+  });
 
   private internalKeyGenerator(originalKey: string): string {
     return this.keyPrefix + originalKey;
