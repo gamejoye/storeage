@@ -16,7 +16,17 @@ export class ExpirationItem<T = any> {
   constructor(value: T, expiration: string | number = PERMANENT_TAG) {
     this._value = value;
     if (typeof expiration === 'number') {
+      if (expiration <= 0) {
+        throw new InternalError('Invalid expiration: ' + expiration);
+      }
       expiration = this.getUTCTime() + expiration + '';
+    }
+    if (
+      typeof expiration === 'string' &&
+      expiration !== PERMANENT_TAG &&
+      Number.isNaN(+expiration)
+    ) {
+      throw new InternalError('Invalid expiration: ' + expiration);
     }
     this._expirtiedAt = expiration;
   }
