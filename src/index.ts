@@ -74,16 +74,32 @@ class Storeage {
   }
 
   setItem<T>(key: string, value: T): Promise<T>;
+  setItem<T>(key: string, value: T, expirationTime: number): Promise<T>;
   setItem<T>(key: string, value: T, onSuccess: (value: T) => void): void;
-  setItem<T>(key: string, value: T, onSuccess?: (value: T) => void): void | Promise<T> {
+  setItem<T>(key: string, value: T, expirationTime: number, onSuccess: (value: T) => void): void;
+  setItem<T>(
+    key: string,
+    value: T,
+    expirationOrCallback?: number | ((value: T) => void),
+    onSuccess?: (value: T) => void
+  ): void | Promise<T> {
+    let expirationTime: number | undefined;
+    let callback: ((value: T) => void) | undefined;
+
+    if (typeof expirationOrCallback === 'number') {
+      expirationTime = expirationOrCallback;
+      callback = onSuccess;
+    } else if (typeof expirationOrCallback === 'function') {
+      callback = expirationOrCallback;
+    }
     const executor = async () => {
       await this.ready();
       const driver = this.getDriver();
       this.driverName = driver.driverName;
-      return driver.setItem<T>(key, value);
+      return driver.setItem<T>(key, value, expirationTime);
     };
-    if (onSuccess) {
-      executor().then(onSuccess);
+    if (callback) {
+      executor().then(callback);
       return;
     }
     return executor();
