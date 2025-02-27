@@ -57,9 +57,9 @@ class Storeage {
     return this.getDriver().config(options);
   };
 
-  getItem<T>(key: string): Promise<T>;
-  getItem<T>(key: string, onSuccess: (value: T) => void): void;
-  getItem<T>(key: string, onSuccess?: (value: T) => void): void | Promise<T> {
+  getItem<T>(key: string): Promise<T | null>;
+  getItem<T>(key: string, onSuccess: (value: T | null) => void): void;
+  getItem<T>(key: string, onSuccess?: (value: T | null) => void): void | Promise<T | null> {
     const executor = async () => {
       await this.ready();
       const driver = this.getDriver();
