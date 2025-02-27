@@ -1,12 +1,18 @@
 import 'fake-indexeddb/auto';
 
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
 import IDBDriver from '../../src/drivers/idb';
+import { DroppedError } from '../../src/errors';
 
 describe('idb driver', () => {
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
     const instance = new IDBDriver();
     return instance.clear();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should be able to get item and set item', async () => {
@@ -83,13 +89,21 @@ describe('idb driver', () => {
     const instance = new IDBDriver();
     await instance.ready();
     await instance.drop();
-    expect(() => instance.getItem('test')).toThrowError();
+    await expect(() => instance.getItem('test')).rejects.toThrowError(DroppedError);
   });
 
-  it('should be able to drop', async () => {
+  it('should be able to set item with expiration', async () => {
     const instance = new IDBDriver();
     await instance.ready();
-    await instance.drop();
-    expect(() => instance.getItem('test')).toThrowError();
+    await instance.setItem('test', 'test', 1000);
+    const now = new Date().getTime();
+
+    vi.setSystemTime(now + 500);
+    const value = await instance.getItem('test');
+    expect(value).toBe('test');
+
+    vi.setSystemTime(now + 2000);
+    const valueToBeExpired = await instance.getItem('test');
+    expect(valueToBeExpired).toBeNull();
   });
 });

@@ -1,11 +1,16 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
 import LocalStorageDriver from '../../src/drivers/localstorage';
 import { DroppedError } from '../../src/errors';
 
 describe('localstorage driver', () => {
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
     const instance = new LocalStorageDriver();
     return instance.clear();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should be able to get item and set item', async () => {
@@ -82,10 +87,25 @@ describe('localstorage driver', () => {
     await instance.ready();
     await instance.setItem('test', 'test');
     await instance.drop();
-    expect(() => instance.getItem('test')).toThrowError(DroppedError);
+    await expect(() => instance.getItem('test')).rejects.toThrowError(DroppedError);
 
     const sameInstance = new LocalStorageDriver();
     const value = await sameInstance.ready().then(() => sameInstance.getItem('test'));
     expect(value).toBeNull();
+  });
+
+  it('should be able to set item with expiration', async () => {
+    const instance = new LocalStorageDriver();
+    await instance.ready();
+    await instance.setItem('test', 'test', 1000);
+    const now = new Date().getTime();
+
+    vi.setSystemTime(now + 500);
+    const value = await instance.getItem('test');
+    expect(value).toBe('test');
+
+    vi.setSystemTime(now + 2000);
+    const valueToBeExpired = await instance.getItem('test');
+    expect(valueToBeExpired).toBeNull();
   });
 });
