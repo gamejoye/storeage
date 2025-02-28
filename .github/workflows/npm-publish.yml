@@ -3,6 +3,7 @@ name: Publish Node.js Package
 on:
   release:
     types: [created]
+  workflow_dispatch: #允许手动触发工作流程
 
 jobs:
   publish-npm:
