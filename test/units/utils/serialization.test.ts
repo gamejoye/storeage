@@ -107,10 +107,14 @@ describe('serialize and deserialize', () => {
     expect(await getBlobText(deserializedImage)).toEqual(await getBlobText(imageBlob));
   });
 
+  it('should be able to serialize and deserialize bigint', async () => {
+    const bigint = 12345678910n;
+    expect(deserialize(await serialize(bigint))).toBe(bigint);
+  });
+
   it('should be able to throw UnsupportedTypeError when serialize unsupported type', async () => {
     await expect(() => serialize(Symbol('test'))).rejects.toThrowError(UnsupportedTypeError);
     await expect(() => serialize(() => {})).rejects.toThrowError(UnsupportedTypeError);
-    await expect(() => serialize(124124124124n)).rejects.toThrowError(UnsupportedTypeError);
   });
 
   it('should be able to work correctly without TextDecoder', async () => {

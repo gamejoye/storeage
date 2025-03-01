@@ -24,6 +24,7 @@ import {
   UINT16_ARRAY_PREFIX,
   UINT32_ARRAY_PREFIX,
   BLOB_PREFIX,
+  BIGINT_PREFIX,
 } from '../constants';
 import { UnsupportedTypeError } from '../errors';
 
@@ -47,6 +48,8 @@ export async function serialize(value: any): Promise<string> {
     return ARRAY_BUFFER_PREFIX + bufferToString(value);
   } else if (type === '[object Blob]') {
     return BLOB_PREFIX + (value as Blob).type + '_' + (await blobToString(value));
+  } else if (type === '[object BigInt]') {
+    return BIGINT_PREFIX + value;
   } else {
     prefix = prefixMap[type as keyof typeof prefixMap] ?? '';
   }

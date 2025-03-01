@@ -10,6 +10,7 @@ import {
   UINT16_ARRAY_PREFIX,
   UINT32_ARRAY_PREFIX,
   BLOB_PREFIX,
+  BIGINT_PREFIX,
 } from '../constants';
 import { InternalError } from '../errors';
 
@@ -33,6 +34,7 @@ const prefixMap = {
     const data = str.substring(index + 1);
     return new Blob([data], { type });
   },
+  [BIGINT_PREFIX]: (str: string) => BigInt(str),
 };
 
 export function deserialize(valueString: string): any {

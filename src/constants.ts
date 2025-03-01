@@ -28,3 +28,4 @@ export const UINT8_CLAMPED_ARRAY_PREFIX = '7:';
 export const UINT16_ARRAY_PREFIX = '8:';
 export const UINT32_ARRAY_PREFIX = '9:';
 export const BLOB_PREFIX = '10:';
+export const BIGINT_PREFIX = '11:';

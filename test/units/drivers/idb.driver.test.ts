@@ -195,5 +195,9 @@ describe('idb driver', () => {
     expect(test17![0]).toBe(1);
     expect(test17![1]).toBe(2);
     expect(test17![2]).toBe(3);
+
+    await instance.setItem('test18', 12345678910n);
+    const test18 = await instance.getItem<bigint>('test18');
+    expect(test18).toBe(12345678910n);
   });
 });
