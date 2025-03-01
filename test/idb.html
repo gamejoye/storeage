@@ -79,16 +79,14 @@
     storeage.config({
       name: 'testDB',
       storeName: 'testStore',
-      driver: ['idb'],
-      version: 2
+      driver: ['idb']
     });
 
     // 创建另一个存储实例
     const anotherStore = storeage.createInstance({
       name: 'testDB',
       storeName: 'anotherStore',
-      driver: ['idb'],
-      version: 2
+      driver: ['idb']
     });
 
     // 测试另一个存储的函数

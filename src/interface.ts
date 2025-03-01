@@ -2,7 +2,6 @@ export interface ConfigOptions {
   driver?: string[];
   name?: string;
   storeName?: string;
-  version?: number;
 }
 
 export interface DropInstanceOptions {
