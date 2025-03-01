@@ -34,10 +34,11 @@ class LocalStorageDriver implements IDriver {
     return expirationItem.value;
   }
 
-  setItem<T>(key: string, value: T, expiration?: number): Promise<T> {
+  async setItem<T>(key: string, value: T, expiration?: number): Promise<T> {
     this.assertNotDropped();
+    if (value === undefined) value = null as T;
     const item = new ExpirationItem(value, expiration);
-    localStorage.setItem(this.internalKeyGenerator(key), item.toString());
+    localStorage.setItem(this.internalKeyGenerator(key), await item.toString());
     return Promise.resolve(value);
   }
 

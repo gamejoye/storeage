@@ -45,11 +45,11 @@ export class ExpirationItem<T = any> {
     };
   }
 
-  toString() {
+  async toString(): Promise<string> {
     return (
       (this._expirtiedAt === PERMANENT_TAG ? PERMANENT_TAG : this._expirtiedAt) +
       EXPIRATION_TAG +
-      serialize(this._value)
+      (await serialize(this._value))
     );
   }
 

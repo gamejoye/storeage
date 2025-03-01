@@ -23,6 +23,7 @@ import {
   UINT8_CLAMPED_ARRAY_PREFIX,
   UINT16_ARRAY_PREFIX,
   UINT32_ARRAY_PREFIX,
+  BLOB_PREFIX,
 } from '../constants';
 import { UnsupportedTypeError } from '../errors';
 
@@ -38,15 +39,14 @@ const prefixMap = {
   '[object Uint32Array]': UINT32_ARRAY_PREFIX,
 };
 
-export function serialize(value: any): string {
+export async function serialize(value: any): Promise<string> {
   if (value === undefined) value = null;
   let prefix = '';
   const type = Object.prototype.toString.call(value);
   if (type === '[object ArrayBuffer]') {
     return ARRAY_BUFFER_PREFIX + bufferToString(value);
   } else if (type === '[object Blob]') {
-    // TODO
-    return '';
+    return BLOB_PREFIX + (value as Blob).type + '_' + (await blobToString(value));
   } else {
     prefix = prefixMap[type as keyof typeof prefixMap] ?? '';
   }
@@ -78,4 +78,13 @@ function bufferToString(buffer: ArrayBuffer): string {
   return Array.from(new Uint8Array(buffer))
     .map(byte => String.fromCharCode(byte))
     .join('');
+}
+
+function blobToString(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsText(blob, 'utf-8');
+  });
 }

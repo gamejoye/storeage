@@ -44,6 +44,7 @@ class IDBDriver implements IDriver {
 
   setItem<T>(key: string, value: T, expiration?: number): Promise<T> {
     this.assertNotDropped();
+    if (value === undefined) value = null as T;
     const item = new ExpirationItem<T>(value, expiration);
     return new Promise<T>(resolve => {
       this.ready().then(() => {

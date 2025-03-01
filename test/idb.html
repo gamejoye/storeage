@@ -115,7 +115,8 @@
         const testData = {
           string: 'Hello from another store',
           number: 100,
-          object: { name: 'AnotherTest', value: 200 }
+          object: { name: 'AnotherTest', value: 200 },
+          blob: new Blob(['test'], { type: 'text/plain' })
         };
 
         for (const [key, value] of Object.entries(testData)) {
@@ -134,11 +135,12 @@
       showAnotherResult('Testing getItem in anotherStore...');
       
       try {
-        const keys = ['string', 'number', 'object'];
+        const keys = ['string', 'number', 'object', 'blob'];
         
         for (const key of keys) {
           const value = await anotherStore.getItem(key);
           showAnotherResult(`✅ Retrieved ${key}: ${JSON.stringify(value)}`);
+          console.log('value:', value);
         }
       } catch (error) {
         showAnotherResult(`❌ Error in getItem: ${error.message}`);

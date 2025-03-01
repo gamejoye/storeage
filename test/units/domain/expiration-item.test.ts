@@ -24,9 +24,9 @@ describe('ExpirationItem', () => {
     expect(expirationItem.value).toBeNull();
   });
 
-  it('should be able to create an expiration item from a string', () => {
+  it('should be able to create an expiration item from a string', async () => {
     const expirationItem = new ExpirationItem('test');
-    expect(ExpirationItem.fromString(expirationItem.toString())).toEqual(expirationItem);
+    expect(ExpirationItem.fromString(await expirationItem.toString())).toEqual(expirationItem);
   });
 
   it('should be able to create an expiration item from a JSON string', () => {

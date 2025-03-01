@@ -9,6 +9,7 @@ import {
   UINT8_CLAMPED_ARRAY_PREFIX,
   UINT16_ARRAY_PREFIX,
   UINT32_ARRAY_PREFIX,
+  BLOB_PREFIX,
 } from '../constants';
 import { InternalError } from '../errors';
 
@@ -23,6 +24,15 @@ const prefixMap = {
   [UINT8_CLAMPED_ARRAY_PREFIX]: (str: string) => new Uint8ClampedArray(JSON.parse(str)),
   [UINT16_ARRAY_PREFIX]: (str: string) => new Uint16Array(JSON.parse(str)),
   [UINT32_ARRAY_PREFIX]: (str: string) => new Uint32Array(JSON.parse(str)),
+  [BLOB_PREFIX]: (str: string) => {
+    const index = str.indexOf('_');
+    if (index === -1) {
+      throw new InternalError('Failed to deserialize value: ' + str);
+    }
+    const type = str.substring(0, index);
+    const data = str.substring(index + 1);
+    return new Blob([data], { type });
+  },
 };
 
 export function deserialize(valueString: string): any {
