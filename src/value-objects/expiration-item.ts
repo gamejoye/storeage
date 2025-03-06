@@ -1,5 +1,5 @@
 import { InternalError } from '../errors';
-import { deserialize, serialize } from '../utils';
+import { parse, stringify } from '../utils';
 
 export const EXPIRATION_TAG = '|||';
 export const PERMANENT_TAG = 'P';
@@ -49,7 +49,7 @@ export class ExpirationItem<T = any> {
     return (
       (this._expirtiedAt === PERMANENT_TAG ? PERMANENT_TAG : this._expirtiedAt) +
       EXPIRATION_TAG +
-      (await serialize(this._value))
+      (await stringify(this._value))
     );
   }
 
@@ -60,7 +60,7 @@ export class ExpirationItem<T = any> {
     }
     const expirationTime = str.substring(0, index);
     const value = str.substring(index + EXPIRATION_TAG.length);
-    return new ExpirationItem(deserialize(value), expirationTime);
+    return new ExpirationItem(parse(value), expirationTime);
   }
 
   static fromJSON<T>(json: ExpirationItemJSON<T>): ExpirationItem<T> {

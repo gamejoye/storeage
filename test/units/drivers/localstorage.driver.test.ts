@@ -177,4 +177,90 @@ describe('localstorage driver', () => {
     const test18 = await instance.getItem<bigint>('test18');
     expect(test18).toBe(12345678910n);
   });
+
+  it('should be able to store complex json data', async () => {
+    const instance = new LocalStorageDriver();
+    await instance.ready();
+    const complexJSON = {
+      a: 1,
+      d: {
+        e: 4,
+        f: 5,
+      },
+      g: [6, 7, 8],
+      h: {
+        i: 9,
+        j: 10,
+        k: 'test',
+      },
+      k: 'test',
+      ui: Uint8Array.from([1, 2, 3]),
+      u8: new Uint8Array([1, 2, 3]),
+      u16: new Uint16Array([1, 2, 3]),
+      u32: new Uint32Array([1, 2, 3]),
+      i8: new Int8Array([1, 2, 3]),
+      i16: new Int16Array([1, 2, 3]),
+      i32: new Int32Array([1, 2, 3]),
+      obj: {
+        a: 1,
+        ui: Uint8Array.from([1, 2, 3]),
+        ab: new ArrayBuffer(5),
+        bn: 12345678910n,
+      },
+      arr: [
+        {
+          a: 1,
+          ui: Uint8Array.from([1, 2, 3]),
+          ab: new ArrayBuffer(5),
+          commonArr: [
+            1,
+            2,
+            '3',
+            null,
+            true,
+            false,
+            124124n,
+            123.345,
+            { a: 1, b: 2 },
+            new Uint8Array([1, 2, 3]),
+            new Int8Array([1, 2, 3]),
+            new Int16Array([1, 2, 3]),
+            new Int32Array([1, 2, 3]),
+            new Uint16Array([1, 2, 3]),
+            new Uint32Array([1, 2, 3]),
+            new Float32Array([1, 2, 3]),
+            new Float64Array([1, 2, 3]),
+          ],
+        },
+      ],
+    };
+    await instance.setItem('test', complexJSON);
+    const test = await instance.getItem<typeof complexJSON>('test');
+    expect(test).toEqual(complexJSON);
+  });
+
+  it('should covert undefined to null', async () => {
+    const instance = new LocalStorageDriver();
+    await instance.ready();
+    const json = {
+      a: undefined,
+      b: [undefined, undefined],
+      c: {
+        a: undefined,
+        b: [undefined, undefined],
+      },
+      e: 'undefined',
+    };
+    await instance.setItem('test', json);
+    const test = await instance.getItem('test');
+    expect(test).toEqual({
+      a: null,
+      b: [null, null],
+      c: {
+        a: null,
+        b: [null, null],
+      },
+      e: 'undefined',
+    });
+  });
 });
