@@ -1,6 +1,6 @@
 {
   "name": "storeage",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "High-performance Offline Storage with localStorage-like API and Enhanced Capabilities",
   "main": "dist/storeage.esm.js",
   "module": "dist/storeage.esm.js",
