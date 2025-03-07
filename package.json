@@ -10,6 +10,7 @@
     "registry": "https://registry.npmjs.org/",
     "access": "public"
   },
+  "homepage": "https://storeage-three.vercel.app/",
   "repository": {
     "type": "git",
     "url": "https://github.com/gamejoye/storeage.git"
