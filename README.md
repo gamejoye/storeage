@@ -1,5 +1,10 @@
 # Storeage 🚀
 
+![Node CI](https://github.com/gamejoye/storeage/workflows/Node%20CI/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/gamejoye/storeage/badge.svg?branch=main)](https://coveralls.io/github/gamejoye/storeage?branch=main)
+[![npm](https://img.shields.io/npm/v/storeage.svg)](https://www.npmjs.com/package/storeage)
+![license](https://img.shields.io/npm/l/storeage)
+
 High-performance Offline Storage with localStorage-like API and Enhanced Capabilities
 
 ---
