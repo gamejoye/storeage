@@ -238,5 +238,6 @@ class Storeage {
 const storeage = new Storeage();
 
 export default storeage;
+export { INTERNAL_DRIVERS } from './constants';
 
 export type { ConfigOptions, DropInstanceOptions, IDriver } from './interface';

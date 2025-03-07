@@ -36,7 +36,7 @@ export async function stringify(value: any): Promise<string> {
     }
     const valueType = Object.prototype.toString.call(value);
     if (valueType === '[object ArrayBuffer]') {
-      return ARRAY_BUFFER_PREFIX + '"' + bufferToString(value) + '"';
+      return ARRAY_BUFFER_PREFIX + bufferToString(value);
     } else if (valueType === '[object Blob]') {
       return BLOB_PREFIX + '"' + (value as Blob).type + '_' + (await blobToString(value)) + '"';
     } else if (valueType === '[object BigInt]') {
@@ -68,7 +68,7 @@ export async function stringify(value: any): Promise<string> {
 }
 
 const parsePrefixMap = {
-  [ARRAY_BUFFER_PREFIX]: (str: string) => decodeStringToBuffer(str),
+  [ARRAY_BUFFER_PREFIX]: (str: Array<number>) => new Uint8Array(str).buffer,
   [FLOAT32_ARRAY_PREFIX]: (str: Array<number>) => new Float32Array(str),
   [FLOAT64_ARRAY_PREFIX]: (str: Array<number>) => new Float64Array(str),
   [INT8_ARRAY_PREFIX]: (str: Array<number>) => new Int8Array(str),
@@ -84,8 +84,9 @@ const parsePrefixMap = {
       throw new InternalError('Failed to deserialize value: ' + str);
     }
     const type = str.substring(0, index);
-    const data = str.substring(index + 1);
-    return new Blob([data], { type });
+    const dataStr = str.substring(index + 1);
+    const data = JSON.parse(dataStr);
+    return new Blob([new Uint8Array(data).buffer], { type });
   },
   [BIGINT_PREFIX]: (str: string) => BigInt(str),
 };
@@ -186,28 +187,17 @@ export function parse(str: string): any {
 }
 
 function bufferToString(buffer: ArrayBuffer): string {
-  return Array.from(new Uint8Array(buffer))
-    .map(byte => String.fromCharCode(byte))
-    .join('');
+  return JSON.stringify(Array.from(new Uint8Array(buffer)));
 }
 
 function blobToString(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
+    reader.onload = () => {
+      const ab = reader.result as ArrayBuffer;
+      resolve(JSON.stringify(Array.from(new Uint8Array(ab))));
+    };
     reader.onerror = reject;
-    reader.readAsText(blob, 'utf-8');
+    reader.readAsArrayBuffer(blob);
   });
-}
-
-function decodeStringToBuffer(str: string): ArrayBuffer {
-  if ('TextDecoder' in window) {
-    const textEncoder = new TextEncoder();
-    return textEncoder.encode(str).buffer as ArrayBuffer;
-  }
-  const uint8Array = new Uint8Array(str.length);
-  for (let i = 0; i < str.length; i++) {
-    uint8Array[i] = str.charCodeAt(i);
-  }
-  return uint8Array.buffer;
 }

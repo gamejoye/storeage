@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { parse, stringify } from '../../../src/utils/json';
 import { UnsupportedTypeError } from '../../../src/errors';
+import { loadImage } from '../../__utils__/loadImage';
 
 describe('json', () => {
   it('should be able to stringify and parse underlying type', async () => {
@@ -47,12 +48,8 @@ describe('json', () => {
   });
 
   it('should be able to stringify and parse array buffer', async () => {
-    const arrayBuffer = new ArrayBuffer(10);
-    const uint8Array = new Uint8Array(arrayBuffer);
-    uint8Array[0] = 1;
-    uint8Array[1] = 2;
-    uint8Array[2] = 3;
-    expect(parse(await stringify(uint8Array.buffer))).toEqual(uint8Array.buffer);
+    const ab = await loadImage();
+    expect(parse(await stringify(ab))).toEqual(ab);
   });
 
   it('should be able to stringify and parse float32 array', async () => {
@@ -115,7 +112,8 @@ describe('json', () => {
     expect(parsedHtml.size).toBe(textHtmlBlob.size);
     expect(await getBlobText(parsedHtml)).toEqual(await getBlobText(textHtmlBlob));
 
-    const imageBlob = new Blob([new Uint8Array([1, 2, 3])], { type: 'image/png' });
+    const ab = await loadImage();
+    const imageBlob = new Blob([ab], { type: 'image/png' });
     const parsedImage = parse(await stringify(imageBlob));
     expect(imageBlob.type).toBe(parsedImage.type);
     expect(parsedImage.size).toBe(imageBlob.size);
