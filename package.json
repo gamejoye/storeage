@@ -1,7 +1,7 @@
 {
   "name": "storeage",
-  "version": "0.2.1-beta.0",
-  "description": "A modern async storage library inspired by localForage, with a similar API",
+  "version": "0.2.1",
+  "description": "High-performance Offline Storage with localStorage-like API and Enhanced Capabilities",
   "main": "dist/storeage.esm.js",
   "module": "dist/storeage.esm.js",
   "browser": "dist/storeage.umd.js",
@@ -15,7 +15,10 @@
     "url": "https://github.com/gamejoye/storeage.git"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "README_cn.md",
+    "LICENSE"
   ],
   "author": "gamejoye",
   "license": "MIT",
