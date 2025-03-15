@@ -23,7 +23,15 @@ storeage.config({ driver: [INTERNAL_DRIVERS.LOCALSTORAGE] });
 
 ## Parameters
 
-- **options**: `{ name?: string, storeName?: string, driver?: string[] }` (optional)
+- **options**: `{ name?: string, storeName?: string, driver?: string[], expirationTime?: number }` (optional)
+  - **name**: `string` (optional)
+    > The name of the storage.
+  - **storeName**: `string` (optional)
+    > The name of the store.
+  - **driver**: `string[]` (optional)
+    > The drivers to use.
+  - **expirationTime**: `number` (optional)
+    > The expiration time of the storage.
 
 > The options to configure the storage.
 

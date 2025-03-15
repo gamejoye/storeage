@@ -23,9 +23,17 @@ storeage.config({ driver: [INTERNAL_DRIVERS.LOCALSTORAGE] });
 
 ## 参数
 
-- **options**: `{ name?: string, storeName?: string, driver?: string[] }` (可选)
+- **options**: `{ name?: string, storeName?: string, driver?: string[], expirationTime?: number }` (可选)
+  - **name**: `string` (可选)
+    > 存储数据库的名称
+  - **storeName**: `string` (可选)
+    > 存储的名称
+  - **driver**: `string[]` (可选)
+    > 期望的驱动序列
+  - **expirationTime**: `number` (可选)
+    > 存储的过期时间
 
-> 配置storeage的参数
+> 配置 storeage 的参数
 
 ## 返回值
 
