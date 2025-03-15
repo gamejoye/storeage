@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { describe, it, expect } from 'vitest';
-import storeage, { ConfigOptions, IDriver } from '../../../src';
+import storeage, { ConfigOptions } from '../../../src';
+import { ConfigError } from '../../../src/errors';
 
 describe('config api', () => {
   it('should be able to config', async () => {
@@ -12,6 +13,38 @@ describe('config api', () => {
     expect(instance.supports('customDriver')).toBe(true);
     const driverName = await instance.ready().then(() => instance.driver());
     expect(driverName).toBe('customDriverStorage');
+  });
+
+  it('should throw error when expirationTime invalid', () => {
+    expect(() =>
+      storeage.createInstance({
+        expirationTime: NaN,
+      })
+    ).toThrow(ConfigError);
+
+    expect(() =>
+      storeage.createInstance({
+        expirationTime: Infinity,
+      })
+    ).toThrow(ConfigError);
+
+    expect(() =>
+      storeage.createInstance({
+        expirationTime: -1000,
+      })
+    ).toThrow(ConfigError);
+
+    expect(() =>
+      storeage.createInstance({
+        expirationTime: -1,
+      })
+    ).toThrow(ConfigError);
+
+    expect(() =>
+      storeage.createInstance({
+        expirationTime: 0,
+      })
+    ).toThrow(ConfigError);
   });
 });
 

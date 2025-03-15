@@ -9,6 +9,7 @@ class Storeage {
   private defaultDriversSequence = [INTERNAL_DRIVERS.IDB, INTERNAL_DRIVERS.LOCALSTORAGE];
   private configDriversSequence: string[] = [];
   private driverName: string | null = null;
+  private expirationTime: number | null = null;
 
   constructor() {
     this.driversMap.set(INTERNAL_DRIVERS.IDB, new IDBDriver());
@@ -48,6 +49,15 @@ class Storeage {
     if (options.driver) {
       this.configDriversSequence = options.driver;
     }
+    if (options.expirationTime !== undefined) {
+      if (!Number.isInteger(options.expirationTime)) {
+        throw new ConfigError('expirationTime must be an integer');
+      }
+      if (options.expirationTime <= 0) {
+        throw new ConfigError('expirationTime must be a positive number');
+      }
+      this.expirationTime = options.expirationTime;
+    }
     options = {
       ...options,
       driver: this.configDriversSequence.length
@@ -83,7 +93,7 @@ class Storeage {
     expirationOrCallback?: number | ((value: T) => void),
     onSuccess?: (value: T) => void
   ): void | Promise<T> {
-    let expirationTime: number | undefined;
+    let expirationTime: number | undefined = this.expirationTime ?? undefined;
     let callback: ((value: T) => void) | undefined;
 
     if (typeof expirationOrCallback === 'number') {
@@ -92,6 +102,7 @@ class Storeage {
     } else if (typeof expirationOrCallback === 'function') {
       callback = expirationOrCallback;
     }
+
     const executor = async () => {
       await this.ready();
       const driver = this.getDriver();

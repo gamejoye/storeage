@@ -2,6 +2,7 @@ export interface ConfigOptions {
   driver?: string[];
   name?: string;
   storeName?: string;
+  expirationTime?: number;
 }
 
 export interface DropInstanceOptions {

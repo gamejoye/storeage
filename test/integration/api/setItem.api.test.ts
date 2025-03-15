@@ -49,4 +49,21 @@ describe('setItem api', () => {
       });
     });
   });
+
+  it('setItem with global expiration time', async () => {
+    const instance = storeage.createInstance({
+      expirationTime: 1000,
+    });
+    await instance.setItem('test', 'test');
+    expect(await instance.getItem('test')).toBe('test');
+    await vi.advanceTimersByTimeAsync(1500);
+    expect(await instance.getItem('test')).toBeNull();
+
+    await instance.setItem('test', 'test', 2000);
+    expect(await instance.getItem('test')).toBe('test');
+    await vi.advanceTimersByTimeAsync(1500);
+    expect(await instance.getItem('test')).toBe('test');
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(await instance.getItem('test')).toBeNull();
+  });
 });
